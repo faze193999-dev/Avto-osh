@@ -1,0 +1,645 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AURA MOTORS | Futuristic Luxury Car Dealership</title>
+  <meta name="description" content="Experience the pinnacle of automotive luxury and performance. Explore, compare, and drive your dream sports car today at Aura Motors.">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+  <!-- Canvas for Floating Ambient Particles -->
+  <canvas id="particles-canvas"></canvas>
+
+  <!-- Luxury Loading Screen -->
+  <div class="loader-wrapper" id="loader">
+    <div class="loader-logo">AURA<span>MOTORS</span></div>
+    <div class="loader-bar">
+      <div class="loader-progress"></div>
+    </div>
+  </div>
+
+  <!-- Sticky Transparent Header -->
+  <header class="main-header" id="header">
+    <nav class="navbar">
+      <a href="#" class="logo">AURA<span>MOTORS</span></a>
+      
+      <ul class="nav-links" id="nav-links">
+        <li><a href="#">Home</a></li>
+        <li><a href="#inventory">Inventory</a></li>
+        <li><a href="#ai-recommender">AI Advisor</a></li>
+        <li><a href="#services">Services</a></li>
+        <li><a href="#testimonials">Reviews</a></li>
+        <li><a href="#contact">Contact</a></li>
+      </ul>
+
+      <div class="nav-controls">
+        <!-- Favorites/Wishlist Toggle Button -->
+        <button class="nav-btn" id="wishlist-toggle" aria-label="Open Wishlist">
+          <i data-lucide="heart"></i>
+          <span class="badge" id="wishlist-badge">0</span>
+        </button>
+
+        <!-- Compare drawer toggle button -->
+        <button class="nav-btn" id="compare-toggle" aria-label="Open Compare Panel">
+          <i data-lucide="git-compare"></i>
+          <span class="badge" id="compare-badge">0</span>
+        </button>
+
+        <!-- Dark/Light Mode Toggle Switch -->
+        <button class="nav-btn" id="theme-toggle" aria-label="Toggle Light/Dark Theme">
+          <i data-lucide="sun" id="theme-icon-sun" style="display: none;"></i>
+          <i data-lucide="moon" id="theme-icon-moon"></i>
+        </button>
+
+        <!-- Mobile Menu Toggle -->
+        <button class="menu-toggle" id="menu-toggle" aria-label="Toggle Navigation Menu">
+          <span></span>
+          <span></span>
+          <span></span>
+        </button>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section" id="home">
+    <div class="hero-bg-slider" id="hero-slider">
+      <!-- Active slide is set in app.js -->
+      <div class="hero-slide active" style="background-image: url('https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=1920&q=80');"></div>
+      <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1920&q=80');"></div>
+      <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1617814076367-b759c7d7e738?auto=format&fit=crop&w=1920&q=80');"></div>
+      <div class="hero-slide" style="background-image: url('https://images.unsplash.com/photo-1632245889027-e406faaa19ca?auto=format&fit=crop&w=1920&q=80');"></div>
+    </div>
+    <div class="hero-overlay"></div>
+
+    <div class="hero-content">
+      <span class="hero-subtitle">The Peak of Performance</span>
+      <h1 class="hero-title">Drive Your <span>Dream Car Today</span></h1>
+      <div class="hero-cta">
+        <a href="#inventory" class="btn btn-primary">
+          View Inventory <i data-lucide="chevron-right"></i>
+        </a>
+        <a href="#contact" class="btn btn-secondary">
+          Book Test Drive <i data-lucide="calendar"></i>
+        </a>
+      </div>
+
+      <!-- Animated statistics counter -->
+      <div class="hero-stats glass">
+        <div class="stat-item">
+          <span class="stat-number" data-target="150">0</span>
+          <span class="stat-label">Luxury Vehicles</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" data-target="12000">0</span>
+          <span class="stat-label">Happy Owners</span>
+        </div>
+        <div class="stat-item">
+          <span class="stat-number" data-target="24">0</span>
+          <span class="stat-label">World Outlets</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Brands Section -->
+  <section class="brands-section glass">
+    <div class="brands-container">
+      <div class="brands-slider">
+        <div class="brand-logo" data-brand="Mercedes-Benz"><i data-lucide="shield-check"></i> Mercedes-Benz</div>
+        <div class="brand-logo" data-brand="BMW"><i data-lucide="activity"></i> BMW</div>
+        <div class="brand-logo" data-brand="Porsche"><i data-lucide="trophy"></i> Porsche</div>
+        <div class="brand-logo" data-brand="Audi"><i data-lucide="award"></i> Audi</div>
+        <div class="brand-logo" data-brand="Lamborghini"><i data-lucide="zap"></i> Lamborghini</div>
+        <div class="brand-logo" data-brand="Ferrari"><i data-lucide="flame"></i> Ferrari</div>
+        <div class="brand-logo" data-brand="Tesla"><i data-lucide="cpu"></i> Tesla</div>
+        <div class="brand-logo" data-brand="Rolls-Royce"><i data-lucide="crown"></i> Rolls-Royce</div>
+        <!-- Duplicate for Infinite loop scrolling effect -->
+        <div class="brand-logo" data-brand="Mercedes-Benz"><i data-lucide="shield-check"></i> Mercedes-Benz</div>
+        <div class="brand-logo" data-brand="BMW"><i data-lucide="activity"></i> BMW</div>
+        <div class="brand-logo" data-brand="Porsche"><i data-lucide="trophy"></i> Porsche</div>
+        <div class="brand-logo" data-brand="Audi"><i data-lucide="award"></i> Audi</div>
+        <div class="brand-logo" data-brand="Lamborghini"><i data-lucide="zap"></i> Lamborghini</div>
+        <div class="brand-logo" data-brand="Ferrari"><i data-lucide="flame"></i> Ferrari</div>
+        <div class="brand-logo" data-brand="Tesla"><i data-lucide="cpu"></i> Tesla</div>
+        <div class="brand-logo" data-brand="Rolls-Royce"><i data-lucide="crown"></i> Rolls-Royce</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Inventory Section -->
+  <section class="inventory-section reveal" id="inventory">
+    <div class="section-header">
+      <span class="section-subtitle">Premium Selection</span>
+      <h2 class="section-title">Explore Our Fleet</h2>
+    </div>
+
+    <!-- Advanced Filters -->
+    <div class="filter-wrapper glass">
+      <div class="filter-grid">
+        <div class="filter-group">
+          <label for="filter-brand">Brand</label>
+          <select id="filter-brand">
+            <option value="all">All Brands</option>
+            <option value="Mercedes-Benz">Mercedes-Benz</option>
+            <option value="BMW">BMW</option>
+            <option value="Porsche">Porsche</option>
+            <option value="Audi">Audi</option>
+            <option value="Lamborghini">Lamborghini</option>
+            <option value="Ferrari">Ferrari</option>
+            <option value="Tesla">Tesla</option>
+            <option value="Rolls-Royce">Rolls-Royce</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-price">Max Price ($)</label>
+          <select id="filter-price">
+            <option value="all">Any Price</option>
+            <option value="100000">Under $100,000</option>
+            <option value="250000">Under $250,000</option>
+            <option value="400000">Under $400,000</option>
+            <option value="600000">Under $600,000</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-fuel">Fuel Type</label>
+          <select id="filter-fuel">
+            <option value="all">All Types</option>
+            <option value="Gasoline">Gasoline</option>
+            <option value="Electric">Electric</option>
+            <option value="Hybrid">Hybrid</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-transmission">Transmission</label>
+          <select id="filter-transmission">
+            <option value="all">All Transmissions</option>
+            <option value="Automatic">Automatic</option>
+            <option value="Manual">Manual</option>
+          </select>
+        </div>
+
+        <div class="filter-group">
+          <label for="filter-year">Model Year</label>
+          <select id="filter-year">
+            <option value="all">Any Year</option>
+            <option value="2024">2024</option>
+            <option value="2023">2023</option>
+          </select>
+        </div>
+
+        <div class="filter-actions">
+          <button class="btn-filter-reset" id="filter-reset-btn">Reset Filters</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Live updates notification bar -->
+    <div class="inventory-meta">
+      <span id="cars-count-display">Showing 8 vehicles</span>
+      <div class="pulse-indicator">
+        <span class="pulse-dot"></span>
+        <span>Live Connection Established</span>
+      </div>
+    </div>
+
+    <!-- Car Cards Grid -->
+    <div class="car-grid" id="car-cards-container">
+      <!-- Generated Dynamically via app.js -->
+    </div>
+  </section>
+
+  <!-- AI Car Recommendation Section -->
+  <section class="ai-section reveal" id="ai-recommender">
+    <div class="ai-container glass">
+      <div class="ai-badge">AI Assistant</div>
+      
+      <div class="ai-content" id="ai-quiz-view">
+        <h3>Find Your Perfect Match</h3>
+        <p>Answer a few questions to let our neural engine select the luxury vehicle that best aligns with your driving character.</p>
+        
+        <div class="ai-quiz-wrapper">
+          <div class="ai-question" id="ai-question-text">Loading Advisor...</div>
+          <div class="ai-options" id="ai-options-container">
+            <!-- Generated Dynamically -->
+          </div>
+        </div>
+
+        <div class="ai-progress-bar">
+          <div class="ai-progress-fill" id="ai-progress-bar-fill"></div>
+        </div>
+      </div>
+
+      <!-- AI Result Panel -->
+      <div class="ai-result" id="ai-result-view" style="display: none;">
+        <h3>Your Ultimate Match</h3>
+        <div id="ai-matched-car-card-placeholder">
+          <!-- Suggested Car Rendered Here -->
+        </div>
+        <button class="btn btn-secondary" id="ai-retry-btn" style="margin-top: 1.5rem;">
+          <i data-lucide="refresh-cw"></i> Consult AI Advisor Again
+        </button>
+      </div>
+
+    </div>
+  </section>
+
+  <!-- Services Section -->
+  <section class="services-section reveal" id="services">
+    <div class="section-header">
+      <span class="section-subtitle">Exquisite Solutions</span>
+      <h2 class="section-title">Luxury Services</h2>
+    </div>
+
+    <div class="services-grid">
+      <div class="service-card glass">
+        <div class="service-icon"><i data-lucide="banknote"></i></div>
+        <h4>Premium Financing</h4>
+        <p>Tailored financial models with customized rates built for high-net-worth acquisitions.</p>
+      </div>
+      <div class="service-card glass">
+        <div class="service-icon"><i data-lucide="key"></i></div>
+        <h4>Bespoke Leasing</h4>
+        <p>Flexible leasing alternatives that allow you to cycle through the latest supercars annually.</p>
+      </div>
+      <div class="service-card glass">
+        <div class="service-icon"><i data-lucide="shield"></i></div>
+        <h4>Comprehensive Insurance</h4>
+        <p>Vanguard coverage plans engineered to offer complete safety on tracks and open highways.</p>
+      </div>
+      <div class="service-card glass">
+        <div class="service-icon"><i data-lucide="wrench"></i></div>
+        <h4>Elite Maintenance</h4>
+        <p>Expert diagnostic mechanics providing regular racing tuning and manufacturer standard service.</p>
+      </div>
+      <div class="service-card glass">
+        <div class="service-icon"><i data-lucide="repeat"></i></div>
+        <h4>Vehicle Trade-In</h4>
+        <p>Immediate transparent appraisal of your current model towards upgrading your performance profile.</p>
+      </div>
+    </div>
+  </section>
+
+  <!-- Testimonials Section -->
+  <section class="testimonials-section reveal" id="testimonials">
+    <div class="section-header">
+      <span class="section-subtitle">Customer Voices</span>
+      <h2 class="section-title">The Owners Lounge</h2>
+    </div>
+
+    <div class="testimonials-container glass">
+      <div class="testimonial-slider" id="testimonial-slider">
+        
+        <div class="testimonial-slide active">
+          <div class="testimonial-rating">
+            <i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i>
+          </div>
+          <p class="testimonial-content">"The procurement of my Aventador Ultimae from Aura Motors was spectacular. From the initial AI advisory consultation to the track-side handover, the level of attention was unparalleled."</p>
+          <div class="testimonial-author">
+            <div class="author-info">
+              <div class="author-name">Alexander Montgomery</div>
+              <div class="author-role">Venture Capitalist</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-slide">
+          <div class="testimonial-rating">
+            <i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i>
+          </div>
+          <p class="testimonial-content">"Having purchased luxury cars on four continents, I can confidently state that Aura Motors sets a new paradigm. Their interactive specifications comparison and dynamic booking were flawless."</p>
+          <div class="testimonial-author">
+            <div class="author-info">
+              <div class="author-name">Helena Rostova</div>
+              <div class="author-role">F1 Racing Team Principal</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="testimonial-slide">
+          <div class="testimonial-rating">
+            <i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i><i data-lucide="star"></i>
+          </div>
+          <p class="testimonial-content">"The Model S Plaid is an absolute marvel of tech, and booking the delivery through their digital checkout with immediate personalized specs updates was an exciting, modern experience."</p>
+          <div class="testimonial-author">
+            <div class="author-info">
+              <div class="author-name">Erick Chen</div>
+              <div class="author-role">Silicon Valley Executive</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="slider-nav" id="slider-nav">
+        <span class="slider-dot active" data-slide="0"></span>
+        <span class="slider-dot" data-slide="1"></span>
+        <span class="slider-dot" data-slide="2"></span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Contact Section -->
+  <section class="contact-section reveal" id="contact">
+    <div class="section-header">
+      <span class="section-subtitle">Let's Connect</span>
+      <h2 class="section-title">Visit The Showroom</h2>
+    </div>
+
+    <div class="contact-grid">
+      <div class="contact-info">
+        <div class="contact-details">
+          
+          <div class="contact-item">
+            <div class="contact-icon glass"><i data-lucide="map-pin"></i></div>
+            <div class="contact-text">
+              <h4>Headquarters Address</h4>
+              <p>750 Luxury Boulevard, Beverly Hills, CA 90210</p>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <div class="contact-icon glass"><i data-lucide="phone"></i></div>
+            <div class="contact-text">
+              <h4>Call Customer Desk</h4>
+              <p><a href="tel:+13105550190">+1 (310) 555-0190</a></p>
+            </div>
+          </div>
+
+          <div class="contact-item">
+            <div class="contact-icon glass"><i data-lucide="mail"></i></div>
+            <div class="contact-text">
+              <h4>Email Enquiries</h4>
+              <p><a href="mailto:concierge@auramotors.com">concierge@auramotors.com</a></p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Quick Contacts Buttons -->
+        <div class="contact-quick-links">
+          <a href="https://wa.me/13105550190?text=I%20am%20interested%20in%20inquiring%20about%20a%20luxury%20vehicle." target="_blank" class="btn btn-primary btn-contact-quick">
+            <i data-lucide="message-square"></i> WhatsApp Chat
+          </a>
+          <a href="tel:+13105550190" class="btn btn-secondary btn-contact-quick">
+            <i data-lucide="phone-call"></i> Call Now
+          </a>
+        </div>
+
+        <!-- Custom Styled Vector-Map Layout -->
+        <div class="map-canvas">
+          <div class="map-bg-image"></div>
+          <div class="map-marker">
+            <div class="map-marker-pin">
+              <i data-lucide="car"></i>
+            </div>
+            <div class="map-marker-text">AURA Beverly Hills</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Contact / booking Form -->
+      <div class="contact-form-wrapper glass">
+        <h3>Secure an Appointment</h3>
+        <form id="showroom-contact-form">
+          <div class="form-grid">
+            <div class="form-field">
+              <label for="form-name">First & Last Name</label>
+              <input type="text" id="form-name" placeholder="John Doe" required>
+            </div>
+            <div class="form-field">
+              <label for="form-email">Email Address</label>
+              <input type="email" id="form-email" placeholder="john@example.com" required>
+            </div>
+            <div class="form-field">
+              <label for="form-phone">Phone Number</label>
+              <input type="tel" id="form-phone" placeholder="+1 (555) 000-0000" required>
+            </div>
+            <div class="form-field">
+              <label for="form-purpose">Appointment Purpose</label>
+              <select id="form-purpose">
+                <option value="test-drive">Book a Test Drive</option>
+                <option value="purchase">Vehicle Acquisition</option>
+                <option value="finance">Financing & Trade-in</option>
+                <option value="custom">Bespoke Configuration</option>
+              </select>
+            </div>
+            <div class="form-field form-group-full">
+              <label for="form-message">Special Requirements</label>
+              <textarea id="form-message" placeholder="Details about your preferred model, timeline, and configurations..."></textarea>
+            </div>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+            Submit Request <i data-lucide="send"></i>
+          </button>
+        </form>
+      </div>
+    </div>
+  </section>
+
+  <!-- Dynamic Detail View Modal (Includes simulated 360 viewer & finance calculator) -->
+  <div class="modal-overlay" id="quickview-modal">
+    <div class="modal-container glass">
+      <button class="modal-close-btn" id="modal-close" aria-label="Close Details Modal">
+        <i data-lucide="x"></i>
+      </button>
+      
+      <div class="modal-body">
+        <div class="detail-grid">
+          
+          <!-- Image slideshow & 360 viewer component -->
+          <div class="detail-media-container">
+            <div class="viewer-toggle-bar">
+              <button class="viewer-toggle-btn active" id="btn-show-gallery">Gallery Slides</button>
+              <button class="viewer-toggle-btn" id="btn-show-360">360° vehicle Tour</button>
+            </div>
+
+            <!-- Main Display Window -->
+            <div class="main-preview-frame" id="modal-preview-frame">
+              <img id="modal-active-img" src="" alt="Car Preview">
+              
+              <!-- 360 Drag overlay -->
+              <div class="viewer-360-overlay hidden" id="overlay-360-drag">
+                <div class="drag-icon-wrapper">
+                  <i data-lucide="move-horizontal"></i>
+                </div>
+                <div class="drag-hint-lbl">Drag Left / Right to Rotate</div>
+              </div>
+            </div>
+
+            <!-- Image thumbnails -->
+            <div class="gallery-thumbs" id="modal-thumbs-container">
+              <!-- Rendered Dynamically -->
+            </div>
+          </div>
+
+          <!-- Specifications, Finance Calculator, Booking details -->
+          <div class="detail-info-col">
+            <div class="detail-info-header">
+              <span class="detail-header-brand" id="modal-car-brand">BRAND</span>
+              <h3 class="detail-header-name" id="modal-car-name">Car Model Name</h3>
+            </div>
+
+            <!-- Specifications Table -->
+            <div class="detail-specs-table">
+              <div class="table-spec-item">
+                <span class="lbl">Engine</span>
+                <span class="val" id="spec-engine">-</span>
+              </div>
+              <div class="table-spec-item">
+                <span class="lbl">Power (HP)</span>
+                <span class="val" id="spec-hp">-</span>
+              </div>
+              <div class="table-spec-item">
+                <span class="lbl">0-60 MPH</span>
+                <span class="val" id="spec-accel">-</span>
+              </div>
+              <div class="table-spec-item">
+                <span class="lbl">Top Speed</span>
+                <span class="val" id="spec-top">-</span>
+              </div>
+              <div class="table-spec-item">
+                <span class="lbl">Drivetrain</span>
+                <span class="val" id="spec-drivetrain">-</span>
+              </div>
+              <div class="table-spec-item">
+                <span class="lbl">Transmission</span>
+                <span class="val" id="spec-transmission">-</span>
+              </div>
+            </div>
+
+            <!-- Finance Calculator -->
+            <div class="fin-calculator-box glass">
+              <h4>Acquisition Estimation</h4>
+              <div class="calc-grid">
+                <div class="form-field">
+                  <label for="calc-downpayment">Down Payment ($)</label>
+                  <input type="number" id="calc-downpayment" value="50000" step="5000" min="0">
+                </div>
+                <div class="form-field">
+                  <label for="calc-term">Term Duration</label>
+                  <select id="calc-term">
+                    <option value="36">36 Months</option>
+                    <option value="48">48 Months</option>
+                    <option value="60" selected>60 Months</option>
+                    <option value="72">72 Months</option>
+                  </select>
+                </div>
+              </div>
+              <div class="calc-result-bar">
+                <span class="calc-result-lbl">Est. Payment</span>
+                <span class="calc-result-val" id="calc-monthly-est">$0 / mo</span>
+              </div>
+            </div>
+
+            <!-- Direct Booking inside Modal -->
+            <div class="booking-form-box">
+              <button class="btn btn-primary" id="btn-modal-reserve" style="width: 100%; justify-content: center;">
+                Initiate Acquisition Inquiries <i data-lucide="key-round"></i>
+              </button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Favorites/Wishlist Drawer (Sliding from the Right) -->
+  <div class="drawer-container glass" id="wishlist-drawer">
+    <div class="drawer-header">
+      <h3>My Favorites</h3>
+      <button class="drawer-close-btn" id="wishlist-close" aria-label="Close Wishlist Drawer">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="drawer-body" id="wishlist-drawer-body">
+      <!-- Populated Dynamically -->
+    </div>
+  </div>
+
+  <!-- Vehicle Compare Specification Slider (Sliding from the Bottom) -->
+  <div class="compare-drawer-bottom glass" id="compare-drawer">
+    <div class="drawer-header" style="padding: 1.5rem 2.5rem;">
+      <h3>Comparison Dashboard</h3>
+      <button class="drawer-close-btn" id="compare-close" aria-label="Close Compare Panel">
+        <i data-lucide="x"></i>
+      </button>
+    </div>
+    <div class="compare-grid" id="compare-grid-container">
+      <!-- Populated Dynamically with up to 3 cars side-by-side -->
+    </div>
+  </div>
+
+  <!-- Premium Footer -->
+  <footer class="main-footer">
+    <div class="footer-top">
+      <div class="footer-col-info">
+        <a href="#" class="footer-logo">AURA<span>MOTORS</span></a>
+        <p class="footer-desc">Redefining automotive exclusivity since 2012. Offering only the highest-specification supercars and bespoke buying experiences for luxury collectors.</p>
+        <div class="social-links">
+          <a href="#" class="social-btn" aria-label="Instagram"><i data-lucide="instagram"></i></a>
+          <a href="#" class="social-btn" aria-label="YouTube"><i data-lucide="youtube"></i></a>
+          <a href="#" class="social-btn" aria-label="Twitter"><i data-lucide="twitter"></i></a>
+          <a href="#" class="social-btn" aria-label="Facebook"><i data-lucide="facebook"></i></a>
+        </div>
+      </div>
+
+      <div class="footer-col">
+        <h4>Showroom Directory</h4>
+        <ul class="footer-links">
+          <li><a href="#inventory">Lamborghini Fleet</a></li>
+          <li><a href="#inventory">Porsche Lineup</a></li>
+          <li><a href="#inventory">Ferrari Exclusives</a></li>
+          <li><a href="#inventory">Rolls-Royce Bespoke</a></li>
+          <li><a href="#inventory">Tesla Electrics</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Quick Access</h4>
+        <ul class="footer-links">
+          <li><a href="#ai-recommender">Neural AI Matcher</a></li>
+          <li><a href="#services">Premium Services</a></li>
+          <li><a href="#contact">Showroom Appointment</a></li>
+          <li><a href="#testimonials">Reviews Panel</a></li>
+          <li><a href="#inventory">Specifications Compare</a></li>
+        </ul>
+      </div>
+
+      <div class="footer-col">
+        <h4>Opening Hours</h4>
+        <ul class="footer-links" style="color: #94a3b8; font-size: 0.9rem;">
+          <li style="display: flex; justify-content: space-between;"><span>Mon - Fri:</span> <span>9:00 AM - 8:00 PM</span></li>
+          <li style="display: flex; justify-content: space-between;"><span>Saturday:</span> <span>10:00 AM - 6:00 PM</span></li>
+          <li style="display: flex; justify-content: space-between;"><span>Sunday:</span> <span>Closed / By Booking</span></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="footer-bottom">
+      <div class="footer-bottom-container">
+        <p>&copy; 2026 AURA MOTORS. All rights reserved. Created with absolute attention to detail.</p>
+        <div class="footer-bottom-links">
+          <a href="#">Privacy Policy</a>
+          <a href="#">Terms & Conditions</a>
+          <a href="#">Bespoke Support</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- GSAP CDN -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Data Import -->
+  <script src="cars.js"></script>
+  <!-- Main Script -->
+  <script src="app.js"></script>
+</body>
+</html>
