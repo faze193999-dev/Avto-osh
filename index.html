@@ -111,6 +111,48 @@
     </div>
   </section>
 
+  <!-- Quick Search Bar -->
+  <div class="quick-search-wrapper reveal">
+    <div class="quick-search-container glass">
+      <div class="search-field">
+        <label for="quick-brand">Brand</label>
+        <select id="quick-brand">
+          <option value="all">All Brands</option>
+          <option value="Mercedes-Benz">Mercedes-Benz</option>
+          <option value="BMW">BMW</option>
+          <option value="Porsche">Porsche</option>
+          <option value="Audi">Audi</option>
+          <option value="Lamborghini">Lamborghini</option>
+          <option value="Ferrari">Ferrari</option>
+          <option value="Tesla">Tesla</option>
+          <option value="Rolls-Royce">Rolls-Royce</option>
+        </select>
+      </div>
+      <div class="search-field">
+        <label for="quick-type">Fuel Type</label>
+        <select id="quick-type">
+          <option value="all">All Types</option>
+          <option value="Gasoline">Gasoline</option>
+          <option value="Electric">Electric</option>
+          <option value="Hybrid">Hybrid</option>
+        </select>
+      </div>
+      <div class="search-field">
+        <label for="quick-price">Max Price</label>
+        <select id="quick-price">
+          <option value="all">Any Price</option>
+          <option value="150000">Under $150,000</option>
+          <option value="300000">Under $300,000</option>
+          <option value="500000">Under $500,000</option>
+        </select>
+      </div>
+      <button class="btn btn-primary btn-search-go" id="quick-search-btn">
+        <i data-lucide="search"></i>
+        <span>Search Fleet</span>
+      </button>
+    </div>
+  </div>
+
   <!-- Featured Brands Section -->
   <section class="brands-section glass">
     <div class="brands-container">
@@ -221,38 +263,47 @@
     </div>
   </section>
 
-  <!-- AI Car Recommendation Section -->
+  <!-- AI Chat Advisor Section -->
   <section class="ai-section reveal" id="ai-recommender">
-    <div class="ai-container glass">
-      <div class="ai-badge">AI Assistant</div>
+    <div class="ai-container glass" style="max-width: 800px; padding: 0; overflow: hidden; border-radius: 16px;">
+      <div class="ai-chat-header" style="display: flex; align-items: center; gap: 1rem; padding: 1.5rem; border-bottom: 1px solid var(--border-color); background: rgba(255,255,255,0.01);">
+        <div class="ai-bot-avatar" style="background: rgba(197, 168, 128, 0.1); color: var(--accent-gold); width: 45px; height: 45px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.3rem;">
+          <i data-lucide="bot"></i>
+        </div>
+        <div style="text-align: left;">
+          <h4 style="font-family: var(--font-family-heading); font-size: 1.1rem; color: var(--text-primary);">Aura Neural Advisor</h4>
+          <p style="font-size: 0.75rem; color: var(--text-secondary); display: flex; align-items: center; gap: 0.3rem; margin-top: 0.1rem;">
+            <span class="online-dot" style="width: 6px; height: 6px; background: #10b981; border-radius: 50%; display: inline-block;"></span>
+            Online | Hashamatli flotingiz maslahatchisi
+          </p>
+        </div>
+      </div>
       
-      <div class="ai-content" id="ai-quiz-view">
-        <h3>Find Your Perfect Match</h3>
-        <p>Answer a few questions to let our neural engine select the luxury vehicle that best aligns with your driving character.</p>
-        
-        <div class="ai-quiz-wrapper">
-          <div class="ai-question" id="ai-question-text">Loading Advisor...</div>
-          <div class="ai-options" id="ai-options-container">
-            <!-- Generated Dynamically -->
+      <div class="ai-chat-body" id="ai-chat-body" style="height: 380px; overflow-y: auto; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem; background: rgba(0,0,0,0.1);">
+        <div class="chat-message bot" style="display: flex; gap: 0.8rem; max-width: 80%; align-self: flex-start; text-align: left;">
+          <div style="background: rgba(197, 168, 128, 0.1); color: var(--accent-gold); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.9rem;">
+            <i data-lucide="bot"></i>
+          </div>
+          <div class="message-content" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 0 12px 12px 12px; padding: 0.9rem 1.2rem; font-size: 0.9rem; color: var(--text-primary); line-height: 1.5;">
+            Salom! AURA MOTORS sun'iy intellekt maslahatchisiga xush kelibsiz. Men sizga mos keladigan superkar yoki hashamatli avtomobilni topishga yordam beraman. 
+            <br><br>
+            Mendan quyidagilarni so'rashingiz mumkin:
+            <ul style="margin-left: 1.2rem; margin-top: 0.5rem; display: flex; flex-direction: column; gap: 0.3rem;">
+              <li><i>"Menga tezkor Lamborghini kerak"</i></li>
+              <li><i>"Elektr moshinalar bormi?"</i></li>
+              <li><i>"Eng arzon model qaysi?"</i></li>
+              <li><i>"Porsche narxi qancha?"</i></li>
+            </ul>
           </div>
         </div>
-
-        <div class="ai-progress-bar">
-          <div class="ai-progress-fill" id="ai-progress-bar-fill"></div>
-        </div>
       </div>
 
-      <!-- AI Result Panel -->
-      <div class="ai-result" id="ai-result-view" style="display: none;">
-        <h3>Your Ultimate Match</h3>
-        <div id="ai-matched-car-card-placeholder">
-          <!-- Suggested Car Rendered Here -->
-        </div>
-        <button class="btn btn-secondary" id="ai-retry-btn" style="margin-top: 1.5rem;">
-          <i data-lucide="refresh-cw"></i> Consult AI Advisor Again
+      <form class="ai-chat-input-wrapper" id="ai-chat-form" style="display: flex; border-top: 1px solid var(--border-color); padding: 1rem; background: rgba(0,0,0,0.2);">
+        <input type="text" id="ai-chat-input" placeholder="Advisor neural chat input (e.g. Find Ferrari)..." required style="flex: 1; background: rgba(255,255,255,0.02); border: 1px solid var(--border-color); border-radius: 8px; padding: 0.8rem 1.2rem; color: var(--text-primary); font-size: 0.9rem; outline: none; transition: var(--transition-fast);">
+        <button type="submit" class="btn btn-primary btn-send-chat" id="ai-chat-send-btn" style="margin-left: 0.75rem; padding: 0.8rem; border-radius: 8px; width: 45px; height: 45px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;">
+          <i data-lucide="send" style="width: 18px; height: 18px;"></i>
         </button>
-      </div>
-
+      </form>
     </div>
   </section>
 
@@ -483,12 +534,27 @@
               <!-- Rendered Dynamically -->
             </div>
           </div>
-
           <!-- Specifications, Finance Calculator, Booking details -->
           <div class="detail-info-col">
             <div class="detail-info-header">
               <span class="detail-header-brand" id="modal-car-brand">BRAND</span>
               <h3 class="detail-header-name" id="modal-car-name">Car Model Name</h3>
+            </div>
+
+            <!-- Modal Action Buttons (Wishlist, Compare, Share) -->
+            <div class="modal-interaction-bar" style="display: flex; gap: 1rem; margin-top: 0.5rem; margin-bottom: 1.25rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.85rem;">
+              <button class="nav-btn-action" id="modal-wishlist-toggle" style="display: flex; align-items: center; gap: 0.4rem; background: transparent; border: none; color: var(--text-secondary); cursor: pointer; transition: var(--transition-fast); font-size: 0.8rem; outline: none; font-family: var(--font-family-body);">
+                <i data-lucide="heart" style="width: 16px; height: 16px;"></i>
+                <span id="modal-wishlist-text">Add to Favorites</span>
+              </button>
+              <button class="nav-btn-action" id="modal-compare-toggle" style="display: flex; align-items: center; gap: 0.4rem; background: transparent; border: none; color: var(--text-secondary); cursor: pointer; transition: var(--transition-fast); font-size: 0.8rem; outline: none; font-family: var(--font-family-body);">
+                <i data-lucide="git-compare" style="width: 16px; height: 16px;"></i>
+                <span id="modal-compare-text">Compare</span>
+              </button>
+              <button class="nav-btn-action" id="modal-share-btn" style="display: flex; align-items: center; gap: 0.4rem; background: transparent; border: none; color: var(--text-secondary); cursor: pointer; transition: var(--transition-fast); font-size: 0.8rem; outline: none; font-family: var(--font-family-body);">
+                <i data-lucide="share-2" style="width: 16px; height: 16px;"></i>
+                <span>Share</span>
+              </button>
             </div>
 
             <!-- Specifications Table -->
@@ -517,10 +583,35 @@
                 <span class="lbl">Transmission</span>
                 <span class="val" id="spec-transmission">-</span>
               </div>
+              <div class="table-spec-item">
+                <span class="lbl">VIN Code</span>
+                <span class="val" id="spec-vin" style="font-family: monospace; font-size: 0.8rem; text-transform: uppercase;">-</span>
+              </div>
+              <div class="table-spec-item">
+                <span class="lbl">Mileage</span>
+                <span class="val" id="spec-mileage">-</span>
+              </div>
+              <div class="table-spec-item">
+                <span class="lbl">Exterior Color</span>
+                <span class="val" id="spec-exterior">-</span>
+              </div>
+              <div class="table-spec-item">
+                <span class="lbl">Interior Color</span>
+                <span class="val" id="spec-interior">-</span>
+              </div>
+              <div class="table-spec-item">
+                <span class="lbl">Status</span>
+                <span class="val" id="spec-status">-</span>
+              </div>
+            </div>
+
+            <div style="margin-top: 1rem; border-top: 1px solid var(--border-color); padding-top: 0.8rem; margin-bottom: 1.5rem; text-align: left;">
+              <h4 style="font-size: 0.85rem; color: var(--text-primary); margin-bottom: 0.25rem; font-weight: 600;">Bespoke Options & Features</h4>
+              <p id="spec-options" style="font-size: 0.8rem; color: var(--text-secondary); line-height: 1.4;"></p>
             </div>
 
             <!-- Finance Calculator -->
-            <div class="fin-calculator-box glass">
+            <div class="fin-calculator-box glass" style="margin-bottom: 1.5rem;">
               <h4>Acquisition Estimation</h4>
               <div class="calc-grid">
                 <div class="form-field">
@@ -543,14 +634,38 @@
               </div>
             </div>
 
-            <!-- Direct Booking inside Modal -->
-            <div class="booking-form-box">
-              <button class="btn btn-primary" id="btn-modal-reserve" style="width: 100%; justify-content: center;">
-                Initiate Acquisition Inquiries <i data-lucide="key-round"></i>
-              </button>
+            <!-- Lead Generation Form -->
+            <div class="booking-form-box glass" style="padding: 1.25rem; border-radius: 8px; background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); text-align: left;">
+              <h4 style="font-size: 0.95rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.8rem;">Inquire About This Vehicle</h4>
+              <form id="modal-lead-form">
+                <div class="form-grid" style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; margin-bottom: 0.75rem;">
+                  <div class="form-field" style="margin: 0; padding: 0;">
+                    <input type="text" id="lead-name" placeholder="Full Name" required style="width: 100%; padding: 0.6rem 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none; font-size: 0.85rem; font-family: var(--font-family-body);">
+                  </div>
+                  <div class="form-field" style="margin: 0; padding: 0;">
+                    <input type="tel" id="lead-phone" placeholder="Phone Number" required style="width: 100%; padding: 0.6rem 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none; font-size: 0.85rem; font-family: var(--font-family-body);">
+                  </div>
+                </div>
+                <div class="form-field" style="margin-bottom: 0.75rem; padding: 0;">
+                  <input type="email" id="lead-email" placeholder="Email Address" required style="width: 100%; padding: 0.6rem 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none; font-size: 0.85rem; font-family: var(--font-family-body);">
+                </div>
+                <div class="form-field" style="margin-bottom: 0.75rem; padding: 0;">
+                  <select id="lead-inquiry-type" style="width: 100%; padding: 0.6rem 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none; font-size: 0.85rem; font-family: var(--font-family-body);">
+                    <option value="Test Drive">Book Private Test Drive</option>
+                    <option value="Request Specs">Request bespoke financing options</option>
+                    <option value="General Inquiry">General Inquiries</option>
+                  </select>
+                </div>
+                <div class="form-field" style="margin-bottom: 1rem; padding: 0;">
+                  <textarea id="lead-message" rows="2" placeholder="Your inquiry message..." style="width: 100%; padding: 0.6rem 0.8rem; background: rgba(0,0,0,0.2); border: 1px solid var(--border-color); border-radius: 6px; color: var(--text-primary); outline: none; font-size: 0.85rem; font-family: var(--font-family-body); resize: none;"></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center; padding: 0.8rem;">
+                  <span>Dispatch Sales Request</span>
+                  <i data-lucide="send" style="width: 16px; height: 16px;"></i>
+                </button>
+              </form>
             </div>
           </div>
-
         </div>
       </div>
     </div>

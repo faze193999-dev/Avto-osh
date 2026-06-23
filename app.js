@@ -3,8 +3,50 @@ const initialCarsData = typeof carsData !== 'undefined' ? carsData : [];
 
 document.addEventListener('DOMContentLoaded', () => {
   
+  function generateRandomVIN() {
+    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+    let vin = "";
+    for (let i = 0; i < 17; i++) {
+      vin += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return vin;
+  }
+
+  function fillMissingCarFields(car) {
+    return {
+      ...car,
+      vin: car.vin || generateRandomVIN(),
+      mileage: car.mileage !== undefined ? car.mileage : Math.floor(Math.random() * 8000) + 200,
+      status: car.status || 'Available',
+      exteriorColor: car.exteriorColor || 'Nero Matte',
+      interiorColor: car.interiorColor || 'Alcantara Black',
+      options: car.options || ['Carbon Ceramic Brakes', 'Sport Exhaust', 'Alcantara Trim', 'Suspension Lift'],
+      dateAdded: car.dateAdded || new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    };
+  }
+
   // Shadow global carsData with the persistent localStorage database
-  const carsData = JSON.parse(localStorage.getItem('aura_cars')) || initialCarsData;
+  let carsData = JSON.parse(localStorage.getItem('aura_cars'));
+  if (!carsData || carsData.length === 0) {
+    carsData = initialCarsData.map(car => fillMissingCarFields({
+      ...car,
+      featured: car.featured !== undefined ? car.featured : true
+    }));
+    localStorage.setItem('aura_cars', JSON.stringify(carsData));
+  } else {
+    let modified = false;
+    carsData = carsData.map(car => {
+      const updated = fillMissingCarFields(car);
+      if (updated.vin !== car.vin || updated.mileage !== car.mileage || updated.exteriorColor !== car.exteriorColor) {
+        modified = true;
+      }
+      return updated;
+    });
+    if (modified) {
+      localStorage.setItem('aura_cars', JSON.stringify(carsData));
+    }
+  }
+
   console.log("AURA MOTORS - Loaded " + carsData.length + " vehicles. Data source: " + (localStorage.getItem('aura_cars') ? "localStorage" : "static cars.js"));
 
   // Initialize Lucide Icons
@@ -77,10 +119,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const specDrivetrain = document.getElementById('spec-drivetrain');
   const specTransmission = document.getElementById('spec-transmission');
 
+  // Extended Spec Selectors
+  const specVin = document.getElementById('spec-vin');
+  const specMileage = document.getElementById('spec-mileage');
+  const specExterior = document.getElementById('spec-exterior');
+  const specInterior = document.getElementById('spec-interior');
+  const specStatus = document.getElementById('spec-status');
+  const specOptions = document.getElementById('spec-options');
+
   const calcDownpayment = document.getElementById('calc-downpayment');
   const calcTerm = document.getElementById('calc-term');
   const calcMonthlyEst = document.getElementById('calc-monthly-est');
-  const btnModalReserve = document.getElementById('btn-modal-reserve');
 
   // --- LOADER ---
   window.addEventListener('load', () => {
@@ -616,6 +665,34 @@ document.addEventListener('DOMContentLoaded', () => {
     specDrivetrain.innerText = car.drivetrain || 'RWD';
     specTransmission.innerText = car.transmission;
 
+    // Populate extended specifications
+    if (specVin) specVin.innerText = car.vin || 'N/A';
+    if (specMileage) specMileage.innerText = car.mileage ? car.mileage.toLocaleString() + ' mi' : '0 mi';
+    if (specExterior) specExterior.innerText = car.exteriorColor || 'N/A';
+    if (specInterior) specInterior.innerText = car.interiorColor || 'N/A';
+    if (specStatus) {
+      specStatus.innerText = car.status || 'Available';
+      if (car.status === 'Sold') {
+        specStatus.style.color = '#ef4444';
+      } else if (car.status === 'Reserved') {
+        specStatus.style.color = '#f59e0b';
+      } else {
+        specStatus.style.color = '#10b981';
+      }
+    }
+    if (specOptions) {
+      specOptions.innerText = Array.isArray(car.options) ? car.options.join(', ') : (car.options || 'None');
+    }
+
+    // Update wishlist / compare button states in modal
+    updateModalInteractionStates();
+
+    // Prefill inquiry form message
+    const leadMessageEl = document.getElementById('lead-message');
+    if (leadMessageEl) {
+      leadMessageEl.value = `I am interested in acquiring the ${car.year} ${car.brand} ${car.name}. Please contact me to discuss customization options.`;
+    }
+
     // Default main photo
     modalActiveImg.src = car.image;
     modalActiveImg.className = '';
@@ -746,17 +823,117 @@ document.addEventListener('DOMContentLoaded', () => {
   window.addEventListener('touchmove', handleMove);
   window.addEventListener('touchend', handleEnd);
 
-  // Reserve/checkout interaction
-  btnModalReserve.addEventListener('click', () => {
+  // --- DETAILS MODAL INTERACTIONS ---
+  function updateModalInteractionStates() {
     if (!state.activeModalCar) return;
-    quickviewModal.classList.remove('active');
-    
-    // prefill contact form purpose and message details
-    document.getElementById('form-purpose').value = 'purchase';
-    document.getElementById('form-message').value = `I am interested in acquiring the ${state.activeModalCar.year} ${state.activeModalCar.brand} ${state.activeModalCar.name}. Please contact me to discuss customization options.`;
-    
-    document.getElementById('contact').scrollIntoView({ behavior: 'smooth' });
-  });
+    const carId = state.activeModalCar.id;
+
+    // Wishlist button state
+    const isWishlisted = state.wishlist.includes(carId);
+    const wishlistTextEl = document.getElementById('modal-wishlist-text');
+    const wishlistToggleEl = document.getElementById('modal-wishlist-toggle');
+    const wishlistIconEl = wishlistToggleEl ? wishlistToggleEl.querySelector('svg') : null;
+
+    if (wishlistTextEl) {
+      wishlistTextEl.innerText = isWishlisted ? "In Favorites" : "Add to Favorites";
+    }
+    if (wishlistToggleEl) {
+      wishlistToggleEl.style.color = isWishlisted ? "var(--accent-gold)" : "var(--text-secondary)";
+    }
+    if (wishlistIconEl) {
+      wishlistIconEl.style.fill = isWishlisted ? "var(--accent-gold)" : "none";
+      wishlistIconEl.style.stroke = isWishlisted ? "var(--accent-gold)" : "currentColor";
+    }
+
+    // Compare button state
+    const isCompared = state.compare.includes(carId);
+    const compareTextEl = document.getElementById('modal-compare-text');
+    const compareToggleEl = document.getElementById('modal-compare-toggle');
+    const compareIconEl = compareToggleEl ? compareToggleEl.querySelector('svg') : null;
+
+    if (compareTextEl) {
+      compareTextEl.innerText = isCompared ? "Added to Compare" : "Compare";
+    }
+    if (compareToggleEl) {
+      compareToggleEl.style.color = isCompared ? "var(--accent-gold)" : "var(--text-secondary)";
+    }
+    if (compareIconEl) {
+      compareIconEl.style.stroke = isCompared ? "var(--accent-gold)" : "currentColor";
+    }
+  }
+
+  const modalWishlistToggle = document.getElementById('modal-wishlist-toggle');
+  if (modalWishlistToggle) {
+    modalWishlistToggle.addEventListener('click', () => {
+      if (!state.activeModalCar) return;
+      toggleWishlist(state.activeModalCar.id);
+      updateModalInteractionStates();
+    });
+  }
+
+  const modalCompareToggle = document.getElementById('modal-compare-toggle');
+  if (modalCompareToggle) {
+    modalCompareToggle.addEventListener('click', () => {
+      if (!state.activeModalCar) return;
+      toggleCompare(state.activeModalCar.id);
+      updateModalInteractionStates();
+    });
+  }
+
+  const modalShareBtn = document.getElementById('modal-share-btn');
+  if (modalShareBtn) {
+    modalShareBtn.addEventListener('click', () => {
+      if (!state.activeModalCar) return;
+      const shareUrl = `${window.location.origin}${window.location.pathname}?car=${state.activeModalCar.id}`;
+      navigator.clipboard.writeText(shareUrl).then(() => {
+        alert("Avtomobil havolasi buferga nusxalandi!");
+      }).catch(err => {
+        console.error("Nusxalashda xatolik:", err);
+      });
+    });
+  }
+
+  // --- DETAILS MODAL LEAD FORM ---
+  const modalLeadForm = document.getElementById('modal-lead-form');
+  if (modalLeadForm) {
+    modalLeadForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      if (!state.activeModalCar) return;
+
+      const name = document.getElementById('lead-name').value.trim();
+      const phone = document.getElementById('lead-phone').value.trim();
+      const email = document.getElementById('lead-email').value.trim();
+      const inquiryType = document.getElementById('lead-inquiry-type').value;
+      const rawMessage = document.getElementById('lead-message').value.trim();
+
+      const message = `[${inquiryType}] ${rawMessage}`;
+
+      const newLead = {
+        id: "lead-" + Date.now(),
+        name: name,
+        phone: phone,
+        email: email,
+        carId: state.activeModalCar.id,
+        carName: `${state.activeModalCar.brand} ${state.activeModalCar.name}`,
+        status: "New",
+        date: new Date().toISOString().split('T')[0],
+        message: message
+      };
+
+      // Save to localStorage
+      const existingLeads = JSON.parse(localStorage.getItem('aura_leads')) || [];
+      existingLeads.push(newLead);
+      localStorage.setItem('aura_leads', JSON.stringify(existingLeads));
+
+      // Show success alert in Uzbek
+      alert(`Rahmat, ${name}! Ushbu avtomobil bo'yicha so'rovingiz qabul qilindi. Tez orada siz bilan bog'lanamiz.`);
+      modalLeadForm.reset();
+      
+      // Close the modal
+      quickviewModal.classList.remove('active');
+      state.activeModalCar = null;
+    });
+  }
 
   // --- AI CAR RECOMMENDATION QUIZ ---
   const aiQuizData = {
@@ -791,161 +968,194 @@ document.addEventListener('DOMContentLoaded', () => {
     ]
   };
 
-  let currentAiStep = 0;
-  const aiAnswers = {};
+  // --- QUICK SEARCH BAR LOGIC ---
+  const quickBrand = document.getElementById('quick-brand');
+  const quickType = document.getElementById('quick-type');
+  const quickPrice = document.getElementById('quick-price');
+  const quickSearchBtn = document.getElementById('quick-search-btn');
 
-  const aiQuestionText = document.getElementById('ai-question-text');
-  const aiOptionsContainer = document.getElementById('ai-options-container');
-  const aiProgressBarFill = document.getElementById('ai-progress-bar-fill');
-  const aiQuizView = document.getElementById('ai-quiz-view');
-  const aiResultView = document.getElementById('ai-result-view');
-  const aiMatchedCarCardPlaceholder = document.getElementById('ai-matched-car-card-placeholder');
-  const aiRetryBtn = document.getElementById('ai-retry-btn');
+  if (quickSearchBtn) {
+    quickSearchBtn.addEventListener('click', () => {
+      if (filterBrand && quickBrand) filterBrand.value = quickBrand.value;
+      if (filterFuel && quickType) filterFuel.value = quickType.value;
+      if (filterPrice && quickPrice) filterPrice.value = quickPrice.value;
 
-  function renderAiQuestion() {
-    if (currentAiStep >= aiQuizData.questions.length) {
-      calculateAiRecommendation();
-      return;
-    }
+      applyFilters();
 
-    const currentQuestion = aiQuizData.questions[currentAiStep];
-    aiQuestionText.innerText = currentQuestion.question;
-    aiOptionsContainer.innerHTML = '';
+      const inventorySection = document.getElementById('inventory');
+      if (inventorySection) {
+        inventorySection.scrollIntoView({ behavior: 'smooth' });
+      }
+    });
+  }
 
-    currentQuestion.options.forEach(opt => {
-      const btn = document.createElement('button');
-      btn.className = 'ai-option-btn';
-      btn.innerText = opt.text;
-      btn.addEventListener('click', () => {
-        aiAnswers[currentQuestion.id] = opt.value;
-        currentAiStep++;
-        updateAiProgressBar();
-        renderAiQuestion();
-      });
-      aiOptionsContainer.appendChild(btn);
+  // --- NEURAL AI CHATBOT ADVISOR LOGIC ---
+  const aiChatForm = document.getElementById('ai-chat-form');
+  const aiChatInput = document.getElementById('ai-chat-input');
+  const aiChatBody = document.getElementById('ai-chat-body');
+
+  window.openCarDetailsFromChat = (carId) => {
+    openQuickviewModal(carId);
+  };
+
+  if (aiChatForm) {
+    aiChatForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const text = aiChatInput.value.trim();
+      if (!text) return;
+
+      appendChatMessage(text, 'user');
+      aiChatInput.value = '';
+
+      const typingId = 'typing-' + Date.now();
+      const typingDiv = document.createElement('div');
+      typingDiv.className = 'chat-message bot';
+      typingDiv.id = typingId;
+      typingDiv.style = "display: flex; gap: 0.8rem; max-width: 80%; align-self: flex-start; text-align: left;";
+      typingDiv.innerHTML = `
+        <div style="background: rgba(197, 168, 128, 0.1); color: var(--accent-gold); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.9rem;">
+          <i data-lucide="bot"></i>
+        </div>
+        <div class="message-content" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 0 12px 12px 12px; padding: 0.6rem 1rem;">
+          <div class="typing-indicator"><span></span><span></span><span></span></div>
+        </div>
+      `;
+      aiChatBody.appendChild(typingDiv);
+      aiChatBody.scrollTop = aiChatBody.scrollHeight;
+      if (window.lucide) window.lucide.createIcons();
+
+      setTimeout(() => {
+        const indicator = document.getElementById(typingId);
+        if (indicator) indicator.remove();
+        processChatbotResponse(text);
+      }, 1200);
     });
   }
 
-  function updateAiProgressBar() {
-    const percent = (currentAiStep / aiQuizData.questions.length) * 100;
-    aiProgressBarFill.style.width = `${percent}%`;
-  }
-
-  function calculateAiRecommendation() {
-    // Scoring logic against carsData
-    let bestCar = null;
-    let highestScore = -999;
-
-    carsData.forEach(car => {
-      let score = 0;
-
-      // 1. Budget checking
-      if (aiAnswers.budget === 'medium') {
-        if (car.price < 150000) score += 3;
-        else if (car.price < 250000) score += 1;
-      } else if (aiAnswers.budget === 'high') {
-        if (car.price >= 150000 && car.price < 350000) score += 3;
-        else if (car.price < 150000) score += 1;
-      } else if (aiAnswers.budget === 'exclusive') {
-        if (car.price >= 350000) score += 3;
-        else if (car.price >= 200000) score += 1;
-      }
-
-      // 2. Lifestyle checking
-      if (aiAnswers.lifestyle === 'track') {
-        if (car.brand === 'Porsche' || car.brand === 'Ferrari' || car.brand === 'Lamborghini') score += 3;
-        if (car.hp > 600) score += 1;
-      } else if (aiAnswers.lifestyle === 'luxury') {
-        if (car.brand === 'Rolls-Royce' || car.brand === 'Mercedes-Benz' || car.brand === 'BMW') score += 3;
-      } else if (aiAnswers.lifestyle === 'electric') {
-        if (car.brand === 'Tesla' || car.fuel === 'Electric') score += 4;
-      }
-
-      // 3. Fuel checking
-      if (aiAnswers.drivetrain === 'gas') {
-        if (car.fuel === 'Gasoline') score += 3;
-      } else if (aiAnswers.drivetrain === 'battery') {
-        if (car.fuel === 'Electric') score += 4;
-      } else if (aiAnswers.drivetrain === 'hybrid') {
-        if (car.fuel === 'Hybrid') score += 4;
-      }
-
-      if (score > highestScore) {
-        highestScore = score;
-        bestCar = car;
-      }
-    });
-
-    if (!bestCar) bestCar = carsData[0]; // fallback safeguard
-
-    // Display recommendation
-    aiQuizView.style.display = 'none';
-    aiResultView.style.display = 'block';
-
-    aiMatchedCarCardPlaceholder.innerHTML = `
-      <div class="car-card glass" style="max-width: 420px; margin: 0 auto; text-align: left;" data-id="${bestCar.id}">
-        <span class="card-badge-top">AI Matching 98%</span>
-        <div class="car-card-img">
-          <img src="${bestCar.image}" alt="${bestCar.name}">
-        </div>
-        <div class="car-card-content">
-          <div class="car-card-brand">${bestCar.brand}</div>
-          <h3 class="car-card-title">${bestCar.name}</h3>
-          
-          <div class="car-card-specs">
-            <div class="spec-info">
-              <span class="spec-val">${bestCar.hp} hp</span>
-              <span class="spec-lbl">Power</span>
-            </div>
-            <div class="spec-info">
-              <span class="spec-val">${bestCar.acceleration}</span>
-              <span class="spec-lbl">0-60 mph</span>
-            </div>
-            <div class="spec-info">
-              <span class="spec-val">${bestCar.topSpeed}</span>
-              <span class="spec-lbl">Top Speed</span>
-            </div>
-          </div>
-          
-          <div class="car-card-footer">
-            <div class="car-card-price">
-              <span class="price-lbl">Starting Price</span>
-              <span class="price-val">$${bestCar.price.toLocaleString()}</span>
-            </div>
-            <button class="btn btn-primary btn-quickview-match" data-action="quickview" style="padding: 0.7rem 1.2rem; font-size: 0.75rem;">
-              Explore Match <i data-lucide="arrow-right"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-    `;
-
-    if (window.lucide) {
-      window.lucide.createIcons();
-    }
-
-    // Match card quick view trigger
-    const matchBtn = aiMatchedCarCardPlaceholder.querySelector('.btn-quickview-match');
-    if (matchBtn) {
-      matchBtn.addEventListener('click', () => {
-        openQuickviewModal(bestCar.id);
-      });
-    }
-  }
-
-  aiRetryBtn.addEventListener('click', () => {
-    currentAiStep = 0;
-    aiAnswers.budget = null;
-    aiAnswers.lifestyle = null;
-    aiAnswers.drivetrain = null;
-    updateAiProgressBar();
+  function appendChatMessage(text, sender, isHtml = false) {
+    const msgDiv = document.createElement('div');
+    msgDiv.className = `chat-message ${sender}`;
     
-    aiResultView.style.display = 'none';
-    aiQuizView.style.display = 'block';
-    renderAiQuestion();
-  });
+    if (sender === 'user') {
+      msgDiv.style = "display: flex; gap: 0.8rem; max-width: 80%; align-self: flex-end; text-align: right; flex-direction: row-reverse;";
+      msgDiv.innerHTML = `
+        <div style="background: rgba(197, 168, 128, 0.15); color: var(--accent-gold); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.9rem;">
+          <i data-lucide="user"></i>
+        </div>
+        <div class="message-content" style="background: rgba(197, 168, 128, 0.1); border: 1px solid rgba(197, 168, 128, 0.2); border-radius: 12px 0 12px 12px; padding: 0.8rem 1.1rem; font-size: 0.9rem; color: var(--text-primary); line-height: 1.5; text-align: left;">
+          ${text}
+        </div>
+      `;
+    } else {
+      msgDiv.style = "display: flex; gap: 0.8rem; max-width: 80%; align-self: flex-start; text-align: left;";
+      msgDiv.innerHTML = `
+        <div style="background: rgba(197, 168, 128, 0.1); color: var(--accent-gold); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.9rem;">
+          <i data-lucide="bot"></i>
+        </div>
+        <div class="message-content" style="background: rgba(255, 255, 255, 0.02); border: 1px solid var(--border-color); border-radius: 0 12px 12px 12px; padding: 0.8rem 1.1rem; font-size: 0.9rem; color: var(--text-primary); line-height: 1.5;">
+          ${text}
+        </div>
+      `;
+    }
+    aiChatBody.appendChild(msgDiv);
+    aiChatBody.scrollTop = aiChatBody.scrollHeight;
+    if (window.lucide) window.lucide.createIcons();
+  }
 
-  renderAiQuestion();
+  function processChatbotResponse(userInput) {
+    const query = userInput.toLowerCase();
+    
+    if (query.includes('salom') || query.includes('hello') || query.includes('hi') || query.includes('qaysi') || query.includes('yordam')) {
+      if (query.length < 8) {
+        appendChatMessage("Salom! Men AURA MOTORS aqlli maslahatchisiman. Sizga qanday avtomobil topib beray? Masalan, 'Lamborghini bormi?', 'Elektr moshinlar' yoki 'Tezkor superkar' deb yozishingiz mumkin.", 'bot');
+        return;
+      }
+    }
+
+    let matches = [...carsData];
+
+    const brands = ['lamborghini', 'porsche', 'ferrari', 'rolls-royce', 'tesla', 'audi', 'bmw', 'mercedes', 'damas', 'chevrolet', 'malibu', 'tracker', 'gentra'];
+    let matchedBrand = null;
+    brands.forEach(b => {
+      if (query.includes(b)) {
+        matchedBrand = b;
+      }
+    });
+
+    if (matchedBrand) {
+      if (matchedBrand === 'lambo') matchedBrand = 'lamborghini';
+      if (matchedBrand === 'rolls') matchedBrand = 'rolls-royce';
+      if (matchedBrand === 'mercedes' || matchedBrand === 'benz') matchedBrand = 'mercedes-benz';
+      
+      matches = matches.filter(c => c.brand.toLowerCase() === matchedBrand || c.name.toLowerCase().includes(matchedBrand));
+    }
+
+    if (query.includes('electric') || query.includes('elektr') || query.includes('tok')) {
+      matches = matches.filter(c => c.fuel === 'Electric');
+    } else if (query.includes('hybrid') || query.includes('gibrid')) {
+      matches = matches.filter(c => c.fuel === 'Hybrid');
+    } else if (query.includes('benzin') || query.includes('gasoline') || query.includes('petrol')) {
+      matches = matches.filter(c => c.fuel === 'Gasoline');
+    }
+
+    if (query.includes('tez') || query.includes('fast') || query.includes('speed') || query.includes('poyga') || query.includes('race')) {
+      matches = matches.filter(c => c.hp > 500 || parseFloat(c.acceleration) < 4);
+      matches.sort((a,b) => parseFloat(a.acceleration) - parseFloat(b.acceleration));
+    }
+
+    if (query.includes('arzon') || query.includes('cheap') || query.includes('oddiy') || query.includes('budget')) {
+      matches.sort((a,b) => a.price - b.price);
+    } else if (query.includes('qimmat') || query.includes('expensive') || query.includes('luxury') || query.includes('premium')) {
+      matches.sort((a,b) => b.price - a.price);
+    }
+
+    if (matches.length > 0) {
+      const bestCar = matches[0];
+      let responseText = `Sizning so'rovingizga mos eng yaxshi variant - <b>${bestCar.brand} ${bestCar.name}</b>. Uning dvigateli ${bestCar.engine}, quvvati ${bestCar.hp} ot kuchi, tezlanishi esa 0-60 mph tezlikka bor-yo'g'i ${bestCar.acceleration} soniyani tashkil etadi.`;
+      
+      appendChatMessage(responseText, 'bot');
+
+      const cardHtml = `
+        <div class="chat-message-car-card">
+          <img src="${bestCar.image}" alt="${bestCar.name}">
+          <div class="chat-message-car-card-body">
+            <h5>${bestCar.brand} ${bestCar.name}</h5>
+            <p>${bestCar.year} | ${bestCar.engine} | ${bestCar.hp} HP</p>
+            <div class="card-footer">
+              <span class="price">$${bestCar.price.toLocaleString()}</span>
+              <button class="btn-view" onclick="openCarDetailsFromChat('${bestCar.id}')">Batafsil ko'rish</button>
+            </div>
+          </div>
+        </div>
+      `;
+      
+      const cardMsgDiv = document.createElement('div');
+      cardMsgDiv.className = 'chat-message bot';
+      cardMsgDiv.style = "display: flex; gap: 0.8rem; max-width: 80%; align-self: flex-start; text-align: left;";
+      cardMsgDiv.innerHTML = `
+        <div style="background: rgba(197, 168, 128, 0.1); color: var(--accent-gold); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 0.9rem;">
+          <i data-lucide="bot"></i>
+        </div>
+        <div>
+          ${cardHtml}
+        </div>
+      `;
+      aiChatBody.appendChild(cardMsgDiv);
+      
+      if (matches.length > 1) {
+        const alts = matches.slice(1, 4).map(c => `<a href="#inventory" onclick="openCarDetailsFromChat('${c.id}'); return false;" style="color: var(--accent-gold); text-decoration: underline; font-weight: 500;">${c.brand} ${c.name}</a>`).join(', ');
+        setTimeout(() => {
+          appendChatMessage(`Muqobil variantlar: ${alts}`, 'bot');
+        }, 600);
+      }
+      
+      aiChatBody.scrollTop = aiChatBody.scrollHeight;
+      if (window.lucide) window.lucide.createIcons();
+
+    } else {
+      appendChatMessage("Kechirasiz, so'rovingizga mos birorta mashina topolmadim. Boshqacha so'rov berib ko'ring (masalan, brend nomi: Porsche, Lamborghini, Malibu yoki turi: elektr, arzon).", 'bot');
+    }
+  }
 
   // --- TESTIMONIALS SLIDER ---
   const tSlider = document.getElementById('testimonial-slider');
@@ -977,18 +1187,36 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // --- SHOWROOM CONTACT FORM HANDLING ---
   const contactForm = document.getElementById('showroom-contact-form');
-  contactForm.addEventListener('submit', (e) => {
-    e.preventDefault();
-    
-    const name = document.getElementById('form-name').value;
-    const email = document.getElementById('form-email').value;
-    const phone = document.getElementById('form-phone').value;
-    const purpose = document.getElementById('form-purpose').value;
-    const message = document.getElementById('form-message').value;
+  if (contactForm) {
+    contactForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      
+      const name = document.getElementById('form-name').value.trim();
+      const email = document.getElementById('form-email').value.trim();
+      const phone = document.getElementById('form-phone').value.trim();
+      const purpose = document.getElementById('form-purpose').value;
+      const messageText = document.getElementById('form-message').value.trim();
 
-    alert(`Thank you, ${name}! Your VIP showroom appointment request has been logged. Our concierge desk will reach out to you at ${email} or ${phone} within the next 2 hours.`);
-    contactForm.reset();
-  });
+      const newLead = {
+        id: "lead-" + Date.now(),
+        name: name,
+        phone: phone,
+        email: email,
+        carId: "",
+        carName: `General Appointment: ${purpose}`,
+        status: "New",
+        date: new Date().toISOString().split('T')[0],
+        message: messageText
+      };
+
+      const existingLeads = JSON.parse(localStorage.getItem('aura_leads')) || [];
+      existingLeads.push(newLead);
+      localStorage.setItem('aura_leads', JSON.stringify(existingLeads));
+
+      alert(`Thank you, ${name}! Your VIP showroom appointment request has been logged. Our concierge desk will reach out to you at ${email} or ${phone} within the next 2 hours.`);
+      contactForm.reset();
+    });
+  }
 
   // --- SCROLL REVEAL ANIMATIONS ---
   const revealElements = document.querySelectorAll('.reveal');
@@ -1019,4 +1247,12 @@ document.addEventListener('DOMContentLoaded', () => {
   renderWishlistDrawer();
   renderCompareDrawer();
 
+  // Open car details from URL param if present
+  const urlParams = new URLSearchParams(window.location.search);
+  const carParam = urlParams.get('car');
+  if (carParam) {
+    setTimeout(() => {
+      openQuickviewModal(carParam);
+    }, 500);
+  }
 });
