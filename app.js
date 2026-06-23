@@ -1,5 +1,11 @@
+// Reference the global carsData array from cars.js
+const initialCarsData = typeof carsData !== 'undefined' ? carsData : [];
+
 document.addEventListener('DOMContentLoaded', () => {
   
+  // Shadow global carsData with the persistent localStorage database
+  const carsData = JSON.parse(localStorage.getItem('aura_cars')) || initialCarsData;
+
   // Initialize Lucide Icons
   if (window.lucide) {
     window.lucide.createIcons();
