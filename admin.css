@@ -1971,3 +1971,114 @@ body.light-theme .auth-form .input-wrapper input:focus {
   20%, 60% { transform: translateX(-6px); }
   40%, 80% { transform: translateX(6px); }
 }
+
+/* ==========================================================================
+   PREMIUM CARS CRUD UPGRADE STYLES
+   ========================================================================== */
+.drag-drop-zone.dragover {
+  border-color: var(--accent-blue) !important;
+  background: rgba(0, 112, 243, 0.05) !important;
+  box-shadow: 0 0 15px var(--accent-blue-glow);
+}
+
+.gallery-preview-card {
+  position: relative;
+  width: 100%;
+  height: 80px;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  background: var(--bg-primary);
+  transition: var(--transition-fast);
+}
+
+.gallery-preview-card img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.gallery-preview-card .card-actions {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.3rem;
+  opacity: 0;
+  transition: var(--transition-fast);
+}
+
+.gallery-preview-card:hover .card-actions {
+  opacity: 1;
+}
+
+.gallery-preview-card .card-actions button {
+  background: rgba(255, 255, 255, 0.15);
+  border: none;
+  border-radius: 4px;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: #fff;
+  transition: var(--transition-fast);
+}
+
+.gallery-preview-card .card-actions button:hover {
+  background: var(--accent-blue);
+  color: #fff;
+}
+
+.gallery-preview-card .card-actions button.btn-card-del:hover {
+  background: var(--accent-red);
+}
+
+.gallery-preview-card .card-actions button svg {
+  width: 12px;
+  height: 12px;
+}
+
+/* Status Badges */
+.status-pill.available {
+  background: rgba(0, 112, 243, 0.1);
+  color: var(--accent-blue);
+}
+.status-pill.available::before {
+  background: var(--accent-blue);
+}
+
+.status-pill.reserved {
+  background: rgba(249, 115, 22, 0.1);
+  color: var(--accent-orange);
+}
+.status-pill.reserved::before {
+  background: var(--accent-orange);
+}
+
+.status-pill.archived {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--text-secondary);
+}
+.status-pill.archived::before {
+  background: var(--text-secondary);
+}
+
+/* Custom Table Checkboxes */
+.catalog-table input[type="checkbox"] {
+  accent-color: var(--accent-blue);
+  cursor: pointer;
+  width: 15px;
+  height: 15px;
+}
+
+.catalog-table tr.selected {
+  background: rgba(0, 112, 243, 0.02) !important;
+}
+

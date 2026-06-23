@@ -346,8 +346,8 @@
           <!-- FILTER BAR -->
           <div class="filter-bar glass">
             <div class="filter-group">
-              <label for="car-filter-search">Search</label>
-              <input type="text" id="car-filter-search" placeholder="Search by name or model...">
+              <label for="car-filter-search">Search Inventory</label>
+              <input type="text" id="car-filter-search" placeholder="Search by name, model, VIN...">
             </div>
             <div class="filter-group">
               <label for="car-filter-brand">Brand</label>
@@ -357,21 +357,65 @@
               </select>
             </div>
             <div class="filter-group">
-              <label for="car-filter-fuel">Fuel Type</label>
-              <select id="car-filter-fuel">
-                <option value="all">All Fuel Types</option>
-                <option value="Gasoline">Gasoline</option>
-                <option value="Electric">Electric</option>
-                <option value="Hybrid">Hybrid</option>
+              <label for="car-filter-status">Status</label>
+              <select id="car-filter-status">
+                <option value="all">All Statuses</option>
+                <option value="Available">Available</option>
+                <option value="Reserved">Reserved</option>
+                <option value="Sold">Sold</option>
+                <option value="Archived">Archived</option>
               </select>
             </div>
             <div class="filter-group">
-              <label for="car-filter-featured">Status</label>
-              <select id="car-filter-featured">
-                <option value="all">All Statuses</option>
-                <option value="featured">Featured Only</option>
-                <option value="standard">Standard Only</option>
+              <label for="car-filter-sort">Sort By</label>
+              <select id="car-filter-sort">
+                <option value="newest">Newest Added</option>
+                <option value="oldest">Oldest Added</option>
+                <option value="price-desc">Price: High to Low</option>
+                <option value="price-asc">Price: Low to High</option>
+                <option value="mileage-asc">Mileage: Low to High</option>
               </select>
+            </div>
+          </div>
+
+          <!-- ADVANCED NUMERIC FILTERS -->
+          <div class="filter-bar glass" style="margin-top: 1rem; grid-template-columns: repeat(4, 1fr);">
+            <div class="filter-group">
+              <label for="car-filter-min-price">Min Price ($)</label>
+              <input type="number" id="car-filter-min-price" placeholder="e.g. 0">
+            </div>
+            <div class="filter-group">
+              <label for="car-filter-max-price">Max Price ($)</label>
+              <input type="number" id="car-filter-max-price" placeholder="e.g. 1000000">
+            </div>
+            <div class="filter-group">
+              <label for="car-filter-min-year">Min Year</label>
+              <input type="number" id="car-filter-min-year" placeholder="e.g. 2020">
+            </div>
+            <div class="filter-group">
+              <label for="car-filter-max-year">Max Year</label>
+              <input type="number" id="car-filter-max-year" placeholder="e.g. 2026">
+            </div>
+          </div>
+
+          <!-- BULK ACTIONS CONTROL BAR -->
+          <div class="bulk-actions-bar glass" id="bulk-actions-bar" style="display: none; margin-top: 1.5rem; justify-content: space-between; align-items: center; padding: 1rem 1.5rem; border-radius: 8px; background: rgba(0, 112, 243, 0.03); border: 1px solid rgba(0, 112, 243, 0.15);">
+            <div class="bulk-info" style="font-weight: 500; font-size: 0.95rem; color: var(--text-primary);">
+              <span id="bulk-selected-count">0 vehicles selected</span>
+            </div>
+            <div class="bulk-controls" style="display: flex; gap: 1rem; align-items: center;">
+              <select id="bulk-action-select" style="padding: 0.5rem 1rem; border-radius: 6px; background: var(--bg-primary); border: 1px solid var(--border-color); color: var(--text-primary); outline: none;">
+                <option value="">Choose bulk action...</option>
+                <option value="delete">Delete Selected</option>
+                <option value="feature">Mark as Featured</option>
+                <option value="unfeature">Mark as Standard</option>
+                <option value="status-Available">Set status: Available</option>
+                <option value="status-Reserved">Set status: Reserved</option>
+                <option value="status-Sold">Set status: Sold</option>
+                <option value="export-csv">Export Listings (CSV)</option>
+                <option value="export-json">Export Listings (JSON)</option>
+              </select>
+              <button class="btn btn-primary" id="btn-apply-bulk" style="padding: 0.5rem 1.2rem; font-size: 0.85rem;">Apply Action</button>
             </div>
           </div>
 
@@ -381,11 +425,12 @@
               <table class="dashboard-table catalog-table">
                 <thead>
                   <tr>
+                    <th style="width: 40px; padding-left: 1.5rem;"><input type="checkbox" id="select-all-cars"></th>
                     <th>Vehicle</th>
                     <th>Year</th>
                     <th>Price</th>
                     <th>Specs</th>
-                    <th>Fuel / Trans</th>
+                    <th>Mileage / Status</th>
                     <th>Featured</th>
                     <th>Actions</th>
                   </tr>
@@ -446,6 +491,42 @@
                   </div>
                 </div>
 
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label for="car-vin">VIN Number *</label>
+                    <input type="text" id="car-vin" required placeholder="e.g. ZH1849A8DF90184B" style="text-transform: uppercase;">
+                  </div>
+                  <div class="form-group">
+                    <label for="car-mileage">Mileage (mi) *</label>
+                    <input type="number" id="car-mileage" min="0" required placeholder="e.g. 1250">
+                  </div>
+                </div>
+
+                <div class="form-row-3">
+                  <div class="form-group">
+                    <label for="car-exterior">Exterior Color *</label>
+                    <input type="text" id="car-exterior" required placeholder="e.g. Nero Nemesis Matte">
+                  </div>
+                  <div class="form-group">
+                    <label for="car-interior">Interior Color *</label>
+                    <input type="text" id="car-interior" required placeholder="e.g. Nero Ade / Giallo Taurus">
+                  </div>
+                  <div class="form-group">
+                    <label for="car-status-select">Listing Status *</label>
+                    <select id="car-status-select" required>
+                      <option value="Available">Available</option>
+                      <option value="Reserved">Reserved</option>
+                      <option value="Sold">Sold</option>
+                      <option value="Archived">Archived</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="car-features-list">Premium Options & Features (Comma separated)</label>
+                  <textarea id="car-features-list" rows="2" placeholder="e.g. Carbon Fiber Exterior Pack, Carbon Ceramic Brakes, Premium Sound System, Active Wing"></textarea>
+                </div>
+
                 <div class="form-row-3">
                   <div class="form-group">
                     <label for="car-fuel">Fuel Type *</label>
@@ -493,28 +574,46 @@
               <div class="form-column">
                 <h3 class="form-section-title">Media & Showroom Display</h3>
                 
+                <!-- Main Display Image URL -->
                 <div class="form-group">
                   <label for="car-image">Main Display Image URL *</label>
                   <input type="url" id="car-image" required placeholder="https://images.unsplash.com/...">
                 </div>
 
+                <!-- Drag & Drop Upload Zone -->
                 <div class="form-group">
-                  <label for="car-gallery">Gallery Image URLs (One URL per line) *</label>
-                  <textarea id="car-gallery" rows="5" required placeholder="https://images.unsplash.com/photo-1
-https://images.unsplash.com/photo-2
-https://images.unsplash.com/photo-3"></textarea>
-                  <p class="field-tip">Provide at least 3 URLs for the showcase slider.</p>
+                  <label>Dealership Gallery Manager</label>
+                  <div class="drag-drop-zone" id="drag-drop-zone" style="border: 2px dashed var(--border-color); border-radius: 12px; padding: 2rem; text-align: center; cursor: pointer; transition: var(--transition-smooth); background: rgba(255, 255, 255, 0.01);">
+                    <i data-lucide="upload-cloud" style="width: 40px; height: 40px; color: var(--accent-blue); margin: 0 auto 0.8rem auto;"></i>
+                    <p style="font-weight: 500; font-size: 0.9rem; margin-bottom: 0.2rem; color: var(--text-primary);">Drag & drop vehicle photos here</p>
+                    <p style="font-size: 0.75rem; color: var(--text-secondary);">or click to browse local files (simulated upload)</p>
+                    <input type="file" id="car-file-upload" multiple accept="image/*" style="display: none;">
+                  </div>
                 </div>
 
+                <!-- Add Image URL -->
+                <div class="form-group" style="display: flex; gap: 0.5rem; align-items: flex-end;">
+                  <div style="flex: 1;">
+                    <label for="add-gallery-url">Add Image by URL</label>
+                    <input type="url" id="add-gallery-url" placeholder="https://images.unsplash.com/photo-...">
+                  </div>
+                  <button type="button" class="btn btn-secondary" id="btn-add-url-gallery" style="padding: 0.85rem 1.2rem; font-size: 0.85rem; height: 43px; border: 1px solid var(--border-color);">Add Image</button>
+                </div>
+
+                <!-- Gallery previews -->
+                <div class="form-group">
+                  <label>Active Gallery Preview & Order</label>
+                  <div class="gallery-manager-grid" id="gallery-manager-grid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); gap: 0.75rem; margin-top: 1rem; min-height: 80px; border: 1px solid var(--border-color); border-radius: 8px; padding: 0.75rem; background: rgba(0,0,0,0.15);">
+                    <!-- Thumbnails populated dynamically -->
+                  </div>
+                  <p class="field-tip">The first photo will be used as the main display cover image.</p>
+                </div>
+
+                <!-- 360 viewer -->
                 <div class="form-group">
                   <label for="car-angles">360° Viewer Image Angles (One URL per line - Exactly 6 URLs)</label>
-                  <textarea id="car-angles" rows="5" placeholder="Angle 1 (Front)...
-Angle 2...
-Angle 3...
-Angle 4...
-Angle 5...
-Angle 6 (Back)..."></textarea>
-                  <p class="field-tip">Optional. If empty, the website will use gallery assets for the 360° carousel.</p>
+                  <textarea id="car-angles" rows="3" placeholder="Angle 1 (Front)...&#10;Angle 2...&#10;Angle 3...&#10;Angle 4...&#10;Angle 5...&#10;Angle 6 (Back)..."></textarea>
+                  <p class="field-tip">Optional. If empty, showroom defaults to standard catalog images.</p>
                 </div>
 
                 <div class="form-group flex-row-align">
@@ -524,10 +623,9 @@ Angle 6 (Back)..."></textarea>
                   </div>
                 </div>
 
-                <div class="form-actions" style="margin-top: 3rem;">
+                <div class="form-actions" style="margin-top: 2.5rem;">
                   <button type="submit" class="btn btn-primary" id="form-submit-btn">Save Vehicle Details</button>
                   <button type="button" class="btn btn-secondary" id="form-clear-btn">Clear All</button>
-                </div>
               </div>
 
             </div>
@@ -799,41 +897,77 @@ Angle 6 (Back)..."></textarea>
       <div class="modal-body">
         <div class="modal-car-grid">
           <div class="modal-car-left">
-            <img id="modal-car-image" src="" alt="Car Image">
-            <div class="modal-car-gallery" id="modal-car-gallery-row">
+            <img id="modal-car-image" src="" alt="Car Image" style="border-radius: 8px; width: 100%; height: auto; max-height: 380px; object-fit: cover;">
+            <div class="modal-car-gallery" id="modal-car-gallery-row" style="display: flex; gap: 0.5rem; margin-top: 1rem; overflow-x: auto; padding-bottom: 0.5rem;">
               <!-- Populated dynamically -->
             </div>
           </div>
-          <div class="modal-car-right">
-            <span class="modal-car-brand" id="modal-car-brand">Lamborghini</span>
-            <div class="modal-car-price" id="modal-car-price">$507,000</div>
-            <p class="modal-car-description" id="modal-car-desc">Description text...</p>
+          <div class="modal-car-right" style="display: flex; flex-direction: column;">
+            <span class="modal-car-brand" id="modal-car-brand" style="text-transform: uppercase; font-size: 0.8rem; letter-spacing: 0.1em; color: var(--text-muted); font-weight: 600;">Lamborghini</span>
+            <div class="modal-car-price" id="modal-car-price" style="font-size: 1.8rem; font-weight: 700; color: var(--accent-blue); margin-top: 0.2rem; margin-bottom: 1rem;">$507,000</div>
             
-            <div class="modal-car-specs-grid">
-              <div class="spec-tile">
-                <span class="spec-label">Year</span>
-                <span class="spec-val" id="modal-car-spec-year">2023</span>
+            <p class="modal-car-description" id="modal-car-desc" style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 1.5rem;">Description text...</p>
+            
+            <!-- Statistics widget inside modal -->
+            <div class="modal-car-stats" style="display: flex; gap: 1rem; margin-top: 0.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem; border-bottom: 1px solid var(--border-color); padding-bottom: 1rem; margin-bottom: 1.5rem;">
+              <div style="flex: 1; text-align: center; border-right: 1px solid var(--border-color);">
+                <div style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem;">Total Inquiries</div>
+                <div style="font-size: 1.4rem; font-weight: 700; color: var(--accent-blue);" id="modal-car-lead-count">0</div>
               </div>
-              <div class="spec-tile">
-                <span class="spec-label">Fuel</span>
-                <span class="spec-val" id="modal-car-spec-fuel">Gasoline</span>
+              <div style="flex: 1; text-align: center;">
+                <div style="font-size: 0.7rem; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.2rem;">Traffic Views</div>
+                <div style="font-size: 1.4rem; font-weight: 700; color: var(--accent-gold);" id="modal-car-view-count">1,248</div>
               </div>
-              <div class="spec-tile">
-                <span class="spec-label">Transmission</span>
-                <span class="spec-val" id="modal-car-spec-trans">Automatic</span>
+            </div>
+
+            <!-- Specs Grid -->
+            <div class="modal-car-specs-grid" style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 0.8rem;">
+              <div class="spec-tile" style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); padding: 0.6rem 0.8rem; border-radius: 6px; display: flex; flex-direction: column;">
+                <span class="spec-label" style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.1rem;">Year</span>
+                <span class="spec-val" id="modal-car-spec-year" style="font-size: 0.9rem; font-weight: 600;">2023</span>
               </div>
-              <div class="spec-tile">
-                <span class="spec-label">Power</span>
-                <span class="spec-val" id="modal-car-spec-hp">780 HP</span>
+              <div class="spec-tile" style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); padding: 0.6rem 0.8rem; border-radius: 6px; display: flex; flex-direction: column;">
+                <span class="spec-label" style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.1rem;">Fuel</span>
+                <span class="spec-val" id="modal-car-spec-fuel" style="font-size: 0.9rem; font-weight: 600;">Gasoline</span>
               </div>
-              <div class="spec-tile">
-                <span class="spec-label">0-60 mph</span>
-                <span class="spec-val" id="modal-car-spec-acc">2.8s</span>
+              <div class="spec-tile" style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); padding: 0.6rem 0.8rem; border-radius: 6px; display: flex; flex-direction: column;">
+                <span class="spec-label" style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.1rem;">Transmission</span>
+                <span class="spec-val" id="modal-car-spec-trans" style="font-size: 0.9rem; font-weight: 600;">Automatic</span>
               </div>
-              <div class="spec-tile">
-                <span class="spec-label">Top Speed</span>
-                <span class="spec-val" id="modal-car-spec-speed">220 mph</span>
+              <div class="spec-tile" style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); padding: 0.6rem 0.8rem; border-radius: 6px; display: flex; flex-direction: column;">
+                <span class="spec-label" style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.1rem;">Power</span>
+                <span class="spec-val" id="modal-car-spec-hp" style="font-size: 0.9rem; font-weight: 600;">780 HP</span>
               </div>
+              <div class="spec-tile" style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); padding: 0.6rem 0.8rem; border-radius: 6px; display: flex; flex-direction: column;">
+                <span class="spec-label" style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.1rem;">0-60 mph</span>
+                <span class="spec-val" id="modal-car-spec-acc" style="font-size: 0.9rem; font-weight: 600;">2.8s</span>
+              </div>
+              <div class="spec-tile" style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); padding: 0.6rem 0.8rem; border-radius: 6px; display: flex; flex-direction: column;">
+                <span class="spec-label" style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.1rem;">Top Speed</span>
+                <span class="spec-val" id="modal-car-spec-speed" style="font-size: 0.9rem; font-weight: 600;">220 mph</span>
+              </div>
+              <div class="spec-tile" style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); padding: 0.6rem 0.8rem; border-radius: 6px; display: flex; flex-direction: column;">
+                <span class="spec-label" style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.1rem;">Mileage</span>
+                <span class="spec-val" id="modal-car-spec-mileage" style="font-size: 0.9rem; font-weight: 600;">0 mi</span>
+              </div>
+              <div class="spec-tile" style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); padding: 0.6rem 0.8rem; border-radius: 6px; display: flex; flex-direction: column;">
+                <span class="spec-label" style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.1rem;">VIN Code</span>
+                <span class="spec-val" id="modal-car-spec-vin" style="font-size: 0.8rem; font-family: monospace; font-weight: 600; text-transform: uppercase;">-</span>
+              </div>
+              <div class="spec-tile" style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); padding: 0.6rem 0.8rem; border-radius: 6px; display: flex; flex-direction: column;">
+                <span class="spec-label" style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.1rem;">Exterior</span>
+                <span class="spec-val" id="modal-car-spec-exterior" style="font-size: 0.9rem; font-weight: 600;">-</span>
+              </div>
+              <div class="spec-tile" style="background: rgba(255,255,255,0.01); border: 1px solid var(--border-color); padding: 0.6rem 0.8rem; border-radius: 6px; display: flex; flex-direction: column;">
+                <span class="spec-label" style="font-size: 0.75rem; color: var(--text-secondary); margin-bottom: 0.1rem;">Interior</span>
+                <span class="spec-val" id="modal-car-spec-interior" style="font-size: 0.9rem; font-weight: 600;">-</span>
+              </div>
+            </div>
+
+            <!-- Premium Options list inside Details view -->
+            <div style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1rem;">
+              <h4 style="font-size: 0.9rem; margin-bottom: 0.4rem; color: var(--text-primary); font-weight: 600;">Premium Features & Options</h4>
+              <p id="modal-car-spec-options" style="font-size: 0.85rem; color: var(--text-secondary); line-height: 1.4;"></p>
             </div>
           </div>
         </div>
@@ -877,6 +1011,45 @@ Angle 6 (Back)..."></textarea>
         <div style="display:flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
           <button class="btn btn-secondary" id="btn-cancel-contact">Close</button>
           <button class="btn btn-primary" id="btn-send-contact"><i data-lucide="send"></i> Dispatch Message</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CUSTOM DELETE CONFIRMATION MODAL -->
+  <div class="modal-overlay" id="delete-confirm-modal">
+    <div class="modal-box glass" style="max-width: 460px; text-align: center;">
+      <div class="modal-header" style="border-bottom: none; justify-content: center; padding-bottom: 0.5rem;">
+        <div style="background: rgba(239, 68, 68, 0.1); color: var(--accent-red); width: 60px; height: 60px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0.5rem auto 1rem auto;">
+          <i data-lucide="alert-triangle" style="width: 32px; height: 32px;"></i>
+        </div>
+      </div>
+      <div class="modal-body" style="padding-top: 0;">
+        <h3 style="font-size: 1.4rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.8rem;">Remove Vehicle Listing?</h3>
+        <p style="font-size: 0.9rem; color: var(--text-secondary); line-height: 1.5; margin-bottom: 2rem;">
+          You are deleting the <span id="delete-car-display-name" style="font-weight: 600; color: var(--text-primary);">Vehicle</span>. Choose a deletion method below.
+        </p>
+        
+        <div style="display: flex; flex-direction: column; gap: 0.8rem;">
+          <button class="btn btn-secondary" id="btn-soft-delete" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.2rem; border-color: rgba(197, 168, 128, 0.2); background: rgba(255,255,255,0.01);">
+            <div style="text-align: left;">
+              <span style="font-weight: 600; display: block; color: var(--text-primary); font-size: 0.9rem;">Soft Delete (Archive)</span>
+              <span style="font-size: 0.75rem; color: var(--text-secondary); display: block; margin-top: 0.1rem;">Hide from catalog, preserve leads</span>
+            </div>
+            <i data-lucide="archive" style="width: 18px; height: 18px; color: var(--accent-gold);"></i>
+          </button>
+          
+          <button class="btn" id="btn-perm-delete" style="width: 100%; display: flex; justify-content: space-between; align-items: center; padding: 1rem 1.2rem; background: rgba(239, 68, 68, 0.1); border: 1px solid rgba(239, 68, 68, 0.25); color: var(--accent-red); transition: var(--transition-fast);">
+            <div style="text-align: left;">
+              <span style="font-weight: 600; display: block; font-size: 0.9rem;">Permanent Delete</span>
+              <span style="font-size: 0.75rem; color: rgba(239, 68, 68, 0.85); display: block; margin-top: 0.1rem;">Completely purge from database</span>
+            </div>
+            <i data-lucide="trash-2" style="width: 18px; height: 18px;"></i>
+          </button>
+        </div>
+        
+        <div style="margin-top: 1.5rem; border-top: 1px solid var(--border-color); padding-top: 1.2rem; display: flex; justify-content: flex-end;">
+          <button class="btn btn-secondary" id="btn-cancel-delete" style="padding: 0.6rem 1.5rem; font-size: 0.85rem; border: 1px solid var(--border-color);">Keep Listing</button>
         </div>
       </div>
     </div>

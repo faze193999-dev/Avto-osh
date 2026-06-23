@@ -67,24 +67,51 @@ document.addEventListener('DOMContentLoaded', () => {
   let cars = JSON.parse(localStorage.getItem('aura_cars'));
   const defaultCars = typeof carsData !== 'undefined' ? carsData : [];
 
-  if (!cars || cars.length === 0) {
-    cars = defaultCars.map(car => ({
+  function generateRandomVIN() {
+    const chars = "ABCDEFGHJKLMNPRSTUVWXYZ0123456789";
+    let vin = "";
+    for (let i = 0; i < 17; i++) {
+      vin += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    return vin;
+  }
+
+  function fillMissingCarFields(car) {
+    return {
       ...car,
-      status: car.status || 'Available', // Available, Reserved, Sold
+      vin: car.vin || generateRandomVIN(),
+      mileage: car.mileage !== undefined ? car.mileage : Math.floor(Math.random() * 8000) + 200,
+      status: car.status || 'Available',
+      exteriorColor: car.exteriorColor || 'Nero Matte',
+      interiorColor: car.interiorColor || 'Alcantara Black',
+      options: car.options || ['Carbon Ceramic Brakes', 'Sport Exhaust', 'Alcantara Trim', 'Suspension Lift'],
+      dateAdded: car.dateAdded || new Date(Date.now() - Math.random() * 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0]
+    };
+  }
+
+  if (!cars || cars.length === 0) {
+    cars = defaultCars.map(car => fillMissingCarFields({
+      ...car,
       featured: car.featured !== undefined ? car.featured : true
     }));
     localStorage.setItem('aura_cars', JSON.stringify(cars));
   } else {
-    // Check if any default cars are missing in the localStorage list and add them
     let modified = false;
+    cars = cars.map(car => {
+      const updated = fillMissingCarFields(car);
+      if (updated.vin !== car.vin || updated.mileage !== car.mileage || updated.exteriorColor !== car.exteriorColor) {
+        modified = true;
+      }
+      return updated;
+    });
+
     defaultCars.forEach(defaultCar => {
       const exists = cars.some(c => c.id === defaultCar.id);
       if (!exists) {
-        cars.unshift({
+        cars.unshift(fillMissingCarFields({
           ...defaultCar,
-          status: defaultCar.status || 'Available',
           featured: defaultCar.featured !== undefined ? defaultCar.featured : true
-        });
+        }));
         modified = true;
       }
     });
@@ -424,17 +451,16 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================================================
 
   function renderDashboardStats() {
-    const totalFleet = cars.length;
+    const totalFleet = cars.filter(c => c.status !== 'Archived').length;
     const activeListings = cars.filter(c => c.status === 'Available').length;
     const newLeads = leads.filter(l => l.status === 'New').length;
-    const soldFleetCount = leads.filter(l => l.status === 'Sold').length;
+    const soldFleetCount = cars.filter(c => c.status === 'Sold').length;
 
-    // Calculate revenue (Sum price of all sold leads)
+    // Calculate revenue (Sum price of all sold cars)
     let totalRevenue = 0;
-    leads.forEach(l => {
-      if (l.status === 'Sold') {
-        const matchCar = cars.find(c => c.id === l.carId);
-        totalRevenue += matchCar ? matchCar.price : 250000; // fallback avg price
+    cars.forEach(c => {
+      if (c.status === 'Sold') {
+        totalRevenue += c.price;
       }
     });
 
@@ -625,8 +651,12 @@ document.addEventListener('DOMContentLoaded', () => {
   const catalogTbody = document.getElementById('catalog-cars-tbody');
   const searchInput = document.getElementById('car-filter-search');
   const brandSelect = document.getElementById('car-filter-brand');
-  const fuelSelect = document.getElementById('car-filter-fuel');
-  const featuredSelect = document.getElementById('car-filter-featured');
+  const statusSelect = document.getElementById('car-filter-status');
+  const sortSelect = document.getElementById('car-filter-sort');
+  const minPriceInput = document.getElementById('car-filter-min-price');
+  const maxPriceInput = document.getElementById('car-filter-max-price');
+  const minYearInput = document.getElementById('car-filter-min-year');
+  const maxYearInput = document.getElementById('car-filter-max-year');
 
   function populateBrandFilters() {
     if (!brandSelect) return;
@@ -652,39 +682,67 @@ document.addEventListener('DOMContentLoaded', () => {
     catalogTbody.innerHTML = '';
     const query = searchInput ? searchInput.value.toLowerCase() : '';
     const brand = brandSelect ? brandSelect.value : 'all';
-    const fuel = fuelSelect ? fuelSelect.value : 'all';
-    const featured = featuredSelect ? featuredSelect.value : 'all';
+    const status = statusSelect ? statusSelect.value : 'all';
+    const sort = sortSelect ? sortSelect.value : 'newest';
+    const minPrice = minPriceInput && minPriceInput.value ? parseFloat(minPriceInput.value) : 0;
+    const maxPrice = maxPriceInput && maxPriceInput.value ? parseFloat(maxPriceInput.value) : Infinity;
+    const minYear = minYearInput && minYearInput.value ? parseInt(minYearInput.value) : 0;
+    const maxYear = maxYearInput && maxYearInput.value ? parseInt(maxYearInput.value) : Infinity;
 
-    const filteredCars = cars.filter(c => {
-      const matchesSearch = c.name.toLowerCase().includes(query) || c.brand.toLowerCase().includes(query);
+    // Filter
+    let filteredCars = cars.filter(c => {
+      const matchesSearch = c.name.toLowerCase().includes(query) || 
+                            c.brand.toLowerCase().includes(query) || 
+                            (c.vin && c.vin.toLowerCase().includes(query));
       const matchesBrand = brand === 'all' || c.brand === brand;
-      const matchesFuel = fuel === 'all' || c.fuel === fuel;
-      const matchesFeatured = featured === 'all' || 
-                              (featured === 'featured' && c.featured) || 
-                              (featured === 'standard' && !c.featured);
-      return matchesSearch && matchesBrand && matchesFuel && matchesFeatured;
+      const matchesStatus = status === 'all' || c.status === status;
+      const matchesPrice = c.price >= minPrice && c.price <= maxPrice;
+      const matchesYear = c.year >= minYear && c.year <= maxYear;
+      return matchesSearch && matchesBrand && matchesStatus && matchesPrice && matchesYear;
+    });
+
+    // Sort
+    filteredCars.sort((a, b) => {
+      if (sort === 'newest') {
+        return new Date(b.dateAdded || 0) - new Date(a.dateAdded || 0);
+      } else if (sort === 'oldest') {
+        return new Date(a.dateAdded || 0) - new Date(b.dateAdded || 0);
+      } else if (sort === 'price-desc') {
+        return b.price - a.price;
+      } else if (sort === 'price-asc') {
+        return a.price - b.price;
+      } else if (sort === 'mileage-asc') {
+        return (a.mileage || 0) - (b.mileage || 0);
+      }
+      return 0;
     });
 
     if (filteredCars.length === 0) {
       catalogTbody.innerHTML = `
         <tr>
-          <td colspan="7" style="text-align: center; padding: 3rem; color: var(--text-secondary);">
+          <td colspan="8" style="text-align: center; padding: 3rem; color: var(--text-secondary);">
             No luxury vehicles match your search filters.
           </td>
         </tr>
       `;
+      const bulkBar = document.getElementById('bulk-actions-bar');
+      if (bulkBar) bulkBar.style.display = 'none';
       return;
     }
 
     filteredCars.forEach(car => {
       const tr = document.createElement('tr');
+      tr.id = `row-car-${car.id}`;
       tr.innerHTML = `
+        <td style="padding-left: 1.5rem;">
+          <input type="checkbox" class="car-select-checkbox" data-id="${car.id}">
+        </td>
         <td>
           <div class="tbl-user" style="cursor: pointer;" onclick="openCarModal('${car.id}')">
             <img src="${car.image}" alt="${car.name}" class="tbl-user-avatar" style="border-radius: 4px; width: 60px; height: 40px; object-fit: cover;">
             <div class="tbl-user-details">
               <h5 style="font-size:0.9rem;">${car.brand} ${car.name}</h5>
-              <p>${car.engine} | ${car.hp} HP</p>
+              <p style="font-size:0.75rem; font-family:monospace; color:var(--accent-gold); text-transform:uppercase; margin-top:0.1rem;">VIN: ${car.vin || 'N/A'}</p>
             </div>
           </div>
         </td>
@@ -692,15 +750,15 @@ document.addEventListener('DOMContentLoaded', () => {
         <td style="font-weight:600; color:var(--accent-blue); font-size: 0.95rem;">$${car.price.toLocaleString()}</td>
         <td>
           <div style="font-size:0.75rem; color:var(--text-secondary);">
-            Drivetrain: <span style="font-weight:600; color:var(--text-primary);">${car.drivetrain}</span><br>
-            Top Speed: <span style="font-weight:600; color:var(--text-primary);">${car.topSpeed}</span>
+            HP: <span style="font-weight:600; color:var(--text-primary);">${car.hp}</span> | Trans: <span style="font-weight:600; color:var(--text-primary);">${car.transmission}</span><br>
+            Drivetrain: <span style="font-weight:600; color:var(--text-primary);">${car.drivetrain}</span>
           </div>
         </td>
         <td>
-          <div style="font-size:0.75rem;">
-            ${car.fuel}<br>
-            <span style="color:var(--text-muted);">${car.transmission}</span>
+          <div style="font-size:0.75rem; margin-bottom:0.3rem;">
+            <span style="font-weight:600; color:var(--text-primary);">${(car.mileage || 0).toLocaleString()} mi</span>
           </div>
+          <span class="status-pill ${car.status ? car.status.toLowerCase() : 'available'}">${car.status || 'Available'}</span>
         </td>
         <td>
           <label class="switch">
@@ -712,6 +770,7 @@ document.addEventListener('DOMContentLoaded', () => {
           <div class="table-actions">
             <button class="btn-action blue" onclick="openCarModal('${car.id}')" title="View details"><i data-lucide="eye"></i></button>
             <button class="btn-action blue" onclick="editCarRecord('${car.id}')" title="Edit specs"><i data-lucide="edit"></i></button>
+            <button class="btn-action blue" onclick="duplicateCarRecord('${car.id}')" title="Duplicate listing"><i data-lucide="copy"></i></button>
             <button class="btn-action red" onclick="deleteCarRecord('${car.id}')" title="Delete vehicle"><i data-lucide="trash-2"></i></button>
           </div>
         </td>
@@ -722,8 +781,22 @@ document.addEventListener('DOMContentLoaded', () => {
         toggleCarFeatured(car.id, e.target.checked);
       });
 
+      // Bind select checkbox
+      tr.querySelector('.car-select-checkbox').addEventListener('change', (e) => {
+        if (e.target.checked) {
+          tr.classList.add('selected');
+        } else {
+          tr.classList.remove('selected');
+        }
+        updateBulkActionsBarState();
+      });
+
       catalogTbody.appendChild(tr);
     });
+
+    const selectAllCheck = document.getElementById('select-all-cars');
+    if (selectAllCheck) selectAllCheck.checked = false;
+    updateBulkActionsBarState();
 
     if (window.lucide) window.lucide.createIcons();
   }
@@ -737,24 +810,194 @@ document.addEventListener('DOMContentLoaded', () => {
   // Bind change/inputs for search catalog filters
   if (searchInput) searchInput.addEventListener('input', renderCarsCatalogTable);
   if (brandSelect) brandSelect.addEventListener('change', renderCarsCatalogTable);
-  if (fuelSelect) fuelSelect.addEventListener('change', renderCarsCatalogTable);
-  if (featuredSelect) featuredSelect.addEventListener('change', renderCarsCatalogTable);
+  if (statusSelect) statusSelect.addEventListener('change', renderCarsCatalogTable);
+  if (sortSelect) sortSelect.addEventListener('change', renderCarsCatalogTable);
+  if (minPriceInput) minPriceInput.addEventListener('input', renderCarsCatalogTable);
+  if (maxPriceInput) maxPriceInput.addEventListener('input', renderCarsCatalogTable);
+  if (minYearInput) minYearInput.addEventListener('input', renderCarsCatalogTable);
+  if (maxYearInput) maxYearInput.addEventListener('input', renderCarsCatalogTable);
+
+  // --- Checkbox & Bulk Actions Logic ---
+  const selectAllCheck = document.getElementById('select-all-cars');
+  const bulkBar = document.getElementById('bulk-actions-bar');
+  const bulkCountSpan = document.getElementById('bulk-selected-count');
+  const bulkActionSelect = document.getElementById('bulk-action-select');
+  const btnApplyBulk = document.getElementById('btn-apply-bulk');
+
+  if (selectAllCheck) {
+    selectAllCheck.addEventListener('change', (e) => {
+      const checked = e.target.checked;
+      const checkboxes = catalogTbody.querySelectorAll('.car-select-checkbox');
+      checkboxes.forEach(cb => {
+        cb.checked = checked;
+        const tr = document.getElementById(`row-car-${cb.dataset.id}`);
+        if (tr) {
+          if (checked) tr.classList.add('selected');
+          else tr.classList.remove('selected');
+        }
+      });
+      updateBulkActionsBarState();
+    });
+  }
+
+  function updateBulkActionsBarState() {
+    if (!bulkBar || !bulkCountSpan) return;
+    const checkboxes = catalogTbody.querySelectorAll('.car-select-checkbox:checked');
+    const count = checkboxes.length;
+    if (count > 0) {
+      bulkBar.style.display = 'flex';
+      bulkCountSpan.innerText = `${count} vehicle${count > 1 ? 's' : ''} selected`;
+    } else {
+      bulkBar.style.display = 'none';
+      bulkCountSpan.innerText = '0 vehicles selected';
+    }
+  }
+
+  if (btnApplyBulk) {
+    btnApplyBulk.addEventListener('click', () => {
+      const action = bulkActionSelect.value;
+      if (!action) {
+        showToast('Choose bulk action first', 'info');
+        return;
+      }
+      const checkedBoxes = catalogTbody.querySelectorAll('.car-select-checkbox:checked');
+      const selectedIds = Array.from(checkedBoxes).map(cb => cb.dataset.id);
+      if (selectedIds.length === 0) return;
+
+      if (action === 'delete') {
+        if (confirm(`Remove ${selectedIds.length} listings from the catalog?`)) {
+          cars = cars.filter(c => !selectedIds.includes(c.id));
+          localStorage.setItem('aura_cars', JSON.stringify(cars));
+          showToast(`${selectedIds.length} listings deleted`, 'error');
+          renderCarsCatalogTable();
+        }
+      } else if (action === 'feature') {
+        cars = cars.map(c => selectedIds.includes(c.id) ? { ...c, featured: true } : c);
+        localStorage.setItem('aura_cars', JSON.stringify(cars));
+        showToast(`Marked ${selectedIds.length} listings as Featured`);
+        renderCarsCatalogTable();
+      } else if (action === 'unfeature') {
+        cars = cars.map(c => selectedIds.includes(c.id) ? { ...c, featured: false } : c);
+        localStorage.setItem('aura_cars', JSON.stringify(cars));
+        showToast(`Marked ${selectedIds.length} listings as Standard`);
+        renderCarsCatalogTable();
+      } else if (action.startsWith('status-')) {
+        const newStatus = action.replace('status-', '');
+        cars = cars.map(c => selectedIds.includes(c.id) ? { ...c, status: newStatus } : c);
+        localStorage.setItem('aura_cars', JSON.stringify(cars));
+        showToast(`Status updated to ${newStatus} for ${selectedIds.length} items`);
+        renderCarsCatalogTable();
+      } else if (action === 'export-csv') {
+        exportCarsData(selectedIds, 'csv');
+      } else if (action === 'export-json') {
+        exportCarsData(selectedIds, 'json');
+      }
+    });
+  }
+
+  function exportCarsData(ids, format) {
+    const listToExport = cars.filter(c => ids.includes(c.id));
+    if (format === 'json') {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(listToExport, null, 2));
+      const dlAnchorElem = document.createElement('a');
+      dlAnchorElem.setAttribute("href",     dataStr     );
+      dlAnchorElem.setAttribute("download", `aura_motors_inventory_${Date.now()}.json`);
+      dlAnchorElem.click();
+      showToast('JSON Export dispatched');
+    } else {
+      let csvContent = "data:text/csv;charset=utf-8,ID,Brand,Model,Year,Price,VIN,Mileage,Status,Featured\n";
+      listToExport.forEach(c => {
+        csvContent += `"${c.id}","${c.brand}","${c.name}",${c.year},${c.price},"${c.vin}",${c.mileage || 0},"${c.status || 'Available'}",${c.featured}\n`;
+      });
+      const encodedUri = encodeURI(csvContent);
+      const dlAnchorElem = document.createElement('a');
+      dlAnchorElem.setAttribute("href", encodedUri);
+      dlAnchorElem.setAttribute("download", `aura_motors_inventory_${Date.now()}.csv`);
+      dlAnchorElem.click();
+      showToast('CSV Export dispatched');
+    }
+  }
+
+  // --- Duplicate Listing Logic ---
+  window.duplicateCarRecord = (id) => {
+    const car = cars.find(c => c.id === id);
+    if (!car) return;
+
+    const newId = `${car.brand.toLowerCase().replace(/[^a-z0-9]/g, '')}-${Date.now().toString().slice(-6)}`;
+    const duplicatedCar = fillMissingCarFields({
+      ...car,
+      id: newId,
+      name: `${car.name} (Copy)`,
+      vin: generateRandomVIN(),
+      dateAdded: new Date().toISOString().split('T')[0],
+      featured: false,
+      status: 'Available'
+    });
+
+    cars.unshift(duplicatedCar);
+    localStorage.setItem('aura_cars', JSON.stringify(cars));
+    showToast(`Duplicated ${car.brand} ${car.name} listing`);
+    renderCarsCatalogTable();
+    populateBrandFilters();
+  };
+
+  // --- Custom Delete Modal Logic ---
+  const deleteModal = document.getElementById('delete-confirm-modal');
+  const deleteModalDisplayName = document.getElementById('delete-car-display-name');
+  const btnSoftDelete = document.getElementById('btn-soft-delete');
+  const btnPermDelete = document.getElementById('btn-perm-delete');
+  const btnCancelDelete = document.getElementById('btn-cancel-delete');
+  let activeDeleteCarId = null;
+
+  window.deleteCarRecord = (id) => {
+    const targetCar = cars.find(c => c.id === id);
+    if (!targetCar || !deleteModal) return;
+
+    activeDeleteCarId = id;
+    if (deleteModalDisplayName) {
+      deleteModalDisplayName.innerText = `${targetCar.brand} ${targetCar.name}`;
+    }
+    deleteModal.classList.add('active');
+  };
+
+  function closeDeleteModal() {
+    if (deleteModal) deleteModal.classList.remove('active');
+    activeDeleteCarId = null;
+  }
+
+  if (btnCancelDelete) btnCancelDelete.addEventListener('click', closeDeleteModal);
+  if (deleteModal) {
+    const closeBtn = deleteModal.querySelector('.modal-close');
+    if (closeBtn) closeBtn.addEventListener('click', closeDeleteModal);
+  }
+
+  if (btnSoftDelete) {
+    btnSoftDelete.addEventListener('click', () => {
+      if (!activeDeleteCarId) return;
+      cars = cars.map(c => c.id === activeDeleteCarId ? { ...c, status: 'Archived' } : c);
+      localStorage.setItem('aura_cars', JSON.stringify(cars));
+      showToast('Listing archived (Soft deleted)', 'info');
+      closeDeleteModal();
+      renderCarsCatalogTable();
+    });
+  }
+
+  if (btnPermDelete) {
+    btnPermDelete.addEventListener('click', () => {
+      if (!activeDeleteCarId) return;
+      const targetCar = cars.find(c => c.id === activeDeleteCarId);
+      cars = cars.filter(c => c.id !== activeDeleteCarId);
+      localStorage.setItem('aura_cars', JSON.stringify(cars));
+      showToast(`${targetCar ? targetCar.brand + ' ' + targetCar.name : 'Vehicle'} permanently deleted`, 'error');
+      closeDeleteModal();
+      renderCarsCatalogTable();
+      populateBrandFilters();
+    });
+  }
 
   // Expose global handles for row actions
   window.editCarRecord = (id) => {
     switchTab('add-car', id);
-  };
-
-  window.deleteCarRecord = (id) => {
-    const targetCar = cars.find(c => c.id === id);
-    if (!targetCar) return;
-
-    if (confirm(`Are you sure you want to permanently delete the ${targetCar.brand} ${targetCar.name} from the registry?`)) {
-      cars = cars.filter(c => c.id !== id);
-      localStorage.setItem('aura_cars', JSON.stringify(cars));
-      showToast(`${targetCar.brand} ${targetCar.name} successfully deleted`, 'error');
-      renderCarsCatalogTable();
-    }
   };
 
   // ==========================================================================
@@ -762,6 +1005,13 @@ document.addEventListener('DOMContentLoaded', () => {
   // ==========================================================================
   const vForm = document.getElementById('vehicle-form');
   const vSubmitBtn = document.getElementById('form-submit-btn');
+  const dragDropZone = document.getElementById('drag-drop-zone');
+  const fileUploadInput = document.getElementById('car-file-upload');
+  const addUrlInput = document.getElementById('add-gallery-url');
+  const btnAddUrlGallery = document.getElementById('btn-add-url-gallery');
+  const galleryManagerGrid = document.getElementById('gallery-manager-grid');
+
+  let activeFormGallery = [];
 
   function setupCarForm(carId = null) {
     if (!vForm) return;
@@ -780,31 +1030,168 @@ document.addEventListener('DOMContentLoaded', () => {
       if (vSubmitBtn) vSubmitBtn.innerText = "Update Vehicle Details";
 
       // Fill values
-      document.getElementById('car-brand').value = car.brand;
-      document.getElementById('car-name').value = car.name;
-      document.getElementById('car-year').value = car.year;
-      document.getElementById('car-price').value = car.price;
-      document.getElementById('car-hp').value = car.hp;
-      document.getElementById('car-fuel').value = car.fuel;
-      document.getElementById('car-transmission').value = car.transmission;
-      document.getElementById('car-drivetrain').value = car.drivetrain;
-      document.getElementById('car-engine').value = car.engine;
-      document.getElementById('car-acceleration').value = car.acceleration;
-      document.getElementById('car-topspeed').value = car.topSpeed;
-      document.getElementById('car-description').value = car.description;
-      document.getElementById('car-image').value = car.image;
-      document.getElementById('car-gallery').value = car.gallery ? car.gallery.join('\n') : '';
+      document.getElementById('car-brand').value = car.brand || '';
+      document.getElementById('car-name').value = car.name || '';
+      document.getElementById('car-year').value = car.year || '';
+      document.getElementById('car-price').value = car.price || '';
+      document.getElementById('car-hp').value = car.hp || '';
+      document.getElementById('car-fuel').value = car.fuel || 'Gasoline';
+      document.getElementById('car-transmission').value = car.transmission || 'Automatic';
+      document.getElementById('car-drivetrain').value = car.drivetrain || '';
+      document.getElementById('car-engine').value = car.engine || '';
+      document.getElementById('car-acceleration').value = car.acceleration || '';
+      document.getElementById('car-topspeed').value = car.topSpeed || '';
+      document.getElementById('car-description').value = car.description || '';
+      
+      document.getElementById('car-vin').value = car.vin || '';
+      document.getElementById('car-mileage').value = car.mileage || 0;
+      document.getElementById('car-exterior').value = car.exteriorColor || '';
+      document.getElementById('car-interior').value = car.interiorColor || '';
+      document.getElementById('car-status-select').value = car.status || 'Available';
+      document.getElementById('car-features-list').value = car.options ? car.options.join(', ') : '';
+
+      document.getElementById('car-image').value = car.image || '';
       document.getElementById('car-angles').value = car.angles ? car.angles.join('\n') : '';
-      document.getElementById('car-featured').checked = car.featured;
+      document.getElementById('car-featured').checked = car.featured || false;
+
+      // Populate gallery manager
+      activeFormGallery = car.gallery ? [...car.gallery] : [car.image];
+      activeFormGallery = activeFormGallery.filter(Boolean);
+      renderGalleryManager();
 
     } else {
       // New Mode
       if (formCarId) formCarId.value = '';
       if (formPageTitle) formPageTitle.innerText = "Add New Vehicle";
       if (vSubmitBtn) vSubmitBtn.innerText = "Save Vehicle Details";
+      
+      // Auto-populate random VIN for ease of testing
+      document.getElementById('car-vin').value = generateRandomVIN();
+      document.getElementById('car-status-select').value = 'Available';
+
+      activeFormGallery = [];
+      renderGalleryManager();
     }
   }
 
+  // --- Gallery Manager Rendering ---
+  function renderGalleryManager() {
+    if (!galleryManagerGrid) return;
+    galleryManagerGrid.innerHTML = '';
+
+    if (activeFormGallery.length === 0) {
+      galleryManagerGrid.innerHTML = `
+        <div style="grid-column: 1/-1; text-align: center; padding: 2rem; color: var(--text-secondary); font-size: 0.85rem;">
+          No photos added yet. Use drag & drop or enter a URL.
+        </div>
+      `;
+      return;
+    }
+
+    activeFormGallery.forEach((url, index) => {
+      const card = document.createElement('div');
+      card.className = 'gallery-preview-card';
+      card.innerHTML = `
+        <img src="${url}" alt="Listing image">
+        <div class="card-actions">
+          <button type="button" onclick="moveGalleryImage(${index}, -1)" title="Move left"><i data-lucide="chevron-left"></i></button>
+          <button type="button" onclick="moveGalleryImage(${index}, 1)" title="Move right"><i data-lucide="chevron-right"></i></button>
+          <button type="button" class="btn-card-del" onclick="deleteGalleryImage(${index})" title="Delete image"><i data-lucide="trash"></i></button>
+        </div>
+      `;
+      galleryManagerGrid.appendChild(card);
+    });
+
+    // Auto-fill Cover image input with first item in gallery
+    const coverInput = document.getElementById('car-image');
+    if (coverInput && activeFormGallery[0]) {
+      coverInput.value = activeFormGallery[0];
+    }
+
+    if (window.lucide) window.lucide.createIcons();
+  }
+
+  // --- Expose Gallery Actions Globally ---
+  window.moveGalleryImage = (index, dir) => {
+    const target = index + dir;
+    if (target < 0 || target >= activeFormGallery.length) return;
+    
+    // Swap items
+    const temp = activeFormGallery[index];
+    activeFormGallery[index] = activeFormGallery[target];
+    activeFormGallery[target] = temp;
+    
+    renderGalleryManager();
+  };
+
+  window.deleteGalleryImage = (index) => {
+    activeFormGallery.splice(index, 1);
+    renderGalleryManager();
+    showToast('Gallery image removed', 'info');
+  };
+
+  // --- Add Image by Remote URL ---
+  if (btnAddUrlGallery && addUrlInput) {
+    btnAddUrlGallery.addEventListener('click', () => {
+      const url = addUrlInput.value.trim();
+      if (!url) return;
+      
+      activeFormGallery.push(url);
+      addUrlInput.value = '';
+      renderGalleryManager();
+      showToast('Image added to gallery');
+    });
+  }
+
+  // --- Drag & Drop simulated upload zone ---
+  if (dragDropZone) {
+    dragDropZone.addEventListener('click', () => {
+      if (fileUploadInput) fileUploadInput.click();
+    });
+
+    dragDropZone.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      dragDropZone.classList.add('dragover');
+    });
+
+    dragDropZone.addEventListener('dragleave', () => {
+      dragDropZone.classList.remove('dragover');
+    });
+
+    dragDropZone.addEventListener('drop', (e) => {
+      e.preventDefault();
+      dragDropZone.classList.remove('dragover');
+      
+      const files = e.dataTransfer.files;
+      handleLocalFiles(files);
+    });
+  }
+
+  if (fileUploadInput) {
+    fileUploadInput.addEventListener('change', (e) => {
+      handleLocalFiles(e.target.files);
+    });
+  }
+
+  function handleLocalFiles(files) {
+    if (!files || files.length === 0) return;
+    
+    let count = 0;
+    Array.from(files).forEach(file => {
+      if (file.type.startsWith('image/')) {
+        const simulatedUrl = URL.createObjectURL(file);
+        activeFormGallery.push(simulatedUrl);
+        count++;
+      }
+    });
+
+    if (count > 0) {
+      renderGalleryManager();
+      showToast(`Simulated upload: ${count} photo${count > 1 ? 's' : ''} added`);
+    }
+  }
+
+  // --- Form Submit Handler ---
   if (vForm) {
     vForm.addEventListener('submit', (e) => {
       e.preventDefault();
@@ -822,10 +1209,18 @@ document.addEventListener('DOMContentLoaded', () => {
       const acceleration = document.getElementById('car-acceleration').value.trim();
       const topSpeed = document.getElementById('car-topspeed').value.trim();
       const description = document.getElementById('car-description').value.trim();
-      const image = document.getElementById('car-image').value.trim();
       
-      const galleryRaw = document.getElementById('car-gallery').value.trim();
-      const gallery = galleryRaw ? galleryRaw.split('\n').map(url => url.trim()) : [image];
+      const vin = document.getElementById('car-vin').value.trim().toUpperCase();
+      const mileage = parseInt(document.getElementById('car-mileage').value) || 0;
+      const exteriorColor = document.getElementById('car-exterior').value.trim();
+      const interiorColor = document.getElementById('car-interior').value.trim();
+      const status = document.getElementById('car-status-select').value;
+      
+      const optionsRaw = document.getElementById('car-features-list').value.trim();
+      const options = optionsRaw ? optionsRaw.split(',').map(o => o.trim()).filter(Boolean) : [];
+
+      const image = document.getElementById('car-image').value.trim() || activeFormGallery[0] || '';
+      const gallery = activeFormGallery.length > 0 ? activeFormGallery : [image];
       
       const anglesRaw = document.getElementById('car-angles').value.trim();
       const angles = anglesRaw ? anglesRaw.split('\n').map(url => url.trim()) : gallery;
@@ -849,23 +1244,34 @@ document.addEventListener('DOMContentLoaded', () => {
         gallery,
         angles,
         featured,
-        status: 'Available'
+        vin,
+        mileage,
+        exteriorColor,
+        interiorColor,
+        status,
+        options
       };
 
       if (carId) {
         // Update
-        cars = cars.map(c => c.id === carId ? { ...recordData, id: carId, status: c.status } : c);
+        const originalCar = cars.find(c => c.id === carId);
+        const originalDate = originalCar ? originalCar.dateAdded : new Date().toISOString().split('T')[0];
+        
+        cars = cars.map(c => c.id === carId ? { ...recordData, id: carId, dateAdded: originalDate } : c);
         localStorage.setItem('aura_cars', JSON.stringify(cars));
         showToast(`${brand} ${name} successfully updated`);
       } else {
         // Create
         const newId = brand.toLowerCase().replace(/[^a-z0-9]/g, '') + '-' + Date.now().toString().slice(-6);
-        cars.push({ ...recordData, id: newId });
+        const dateAdded = new Date().toISOString().split('T')[0];
+        
+        cars.push({ ...recordData, id: newId, dateAdded });
         localStorage.setItem('aura_cars', JSON.stringify(cars));
         showToast(`${brand} ${name} catalog entry created`);
       }
 
-      // Redirect back to listings
+      renderCarsCatalogTable();
+      populateBrandFilters();
       switchTab('cars');
     });
 
@@ -873,6 +1279,8 @@ document.addEventListener('DOMContentLoaded', () => {
     if (clearBtn) {
       clearBtn.addEventListener('click', () => {
         vForm.reset();
+        activeFormGallery = [];
+        renderGalleryManager();
         showToast('Form fields cleared', 'info');
       });
     }
@@ -1330,6 +1738,29 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('modal-car-spec-hp').innerText = `${car.hp} HP`;
     document.getElementById('modal-car-spec-acc').innerText = car.acceleration;
     document.getElementById('modal-car-spec-speed').innerText = car.topSpeed;
+    
+    document.getElementById('modal-car-spec-mileage').innerText = `${(car.mileage || 0).toLocaleString()} mi`;
+    document.getElementById('modal-car-spec-vin').innerText = car.vin || 'N/A';
+    document.getElementById('modal-car-spec-exterior').innerText = car.exteriorColor || 'N/A';
+    document.getElementById('modal-car-spec-interior').innerText = car.interiorColor || 'N/A';
+    
+    // Status text in spec tile
+    const statusSpec = document.getElementById('modal-car-spec-status');
+    if (statusSpec) {
+      statusSpec.innerText = car.status || 'Available';
+      statusSpec.className = 'spec-val'; // reset
+    }
+
+    document.getElementById('modal-car-spec-options').innerText = car.options && car.options.length > 0 ? car.options.join(', ') : 'None specified';
+
+    // Inquiry & Views stats
+    const carLeadsCount = leads ? leads.filter(l => l.carId === carId).length : 0;
+    document.getElementById('modal-car-lead-count').innerText = carLeadsCount;
+    
+    if (!car.views) {
+      car.views = Math.floor(Math.random() * 1200) + 180;
+    }
+    document.getElementById('modal-car-view-count').innerText = car.views.toLocaleString();
 
     // Set Media
     const mainImg = document.getElementById('modal-car-image');
@@ -1340,16 +1771,22 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Merge image & gallery to create thumbnail row
     const allImages = [car.image, ...(car.gallery || [])];
-    const uniqueImages = [...new Set(allImages)];
+    const uniqueImages = [...new Set(allImages)].filter(Boolean);
 
     uniqueImages.forEach((imgSrc, index) => {
       const img = document.createElement('img');
       img.src = imgSrc;
       img.className = `modal-gal-thumb ${index === 0 ? 'active' : ''}`;
+      img.style = "width: 70px; height: 50px; object-fit: cover; border-radius: 4px; cursor: pointer; border: 1px solid var(--border-color); opacity: 0.7; transition: var(--transition-fast); flex-shrink: 0;";
       img.addEventListener('click', () => {
         mainImg.src = imgSrc;
         galleryRow.querySelectorAll('.modal-gal-thumb').forEach(t => t.classList.remove('active'));
         img.classList.add('active');
+      });
+      // Add dynamic hover opacity override via class/js style
+      img.addEventListener('mouseenter', () => img.style.opacity = '1');
+      img.addEventListener('mouseleave', () => {
+        if (!img.classList.contains('active')) img.style.opacity = '0.7';
       });
       galleryRow.appendChild(img);
     });
