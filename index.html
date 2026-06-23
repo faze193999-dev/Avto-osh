@@ -684,10 +684,13 @@
       </div>
 
       <!-- Google Sign-In Container -->
-      <div class="oauth-container">
-        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem;">Sign in to access your exclusive dashboard</p>
+      <div class="oauth-container" style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
+        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-align: center;">Sign in to access your exclusive dashboard</p>
         <!-- Google GSI Button renders here. Fallback button injected by auth.js if offline -->
         <div id="google-signin-btn"></div>
+        <button class="btn btn-secondary" id="demo-signin-btn" style="width: 320px; font-size: 0.8rem; letter-spacing: 0.15rem; justify-content: center;">
+          Demo Mode (Bypass Auth)
+        </button>
       </div>
 
       <!-- Divider -->

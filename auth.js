@@ -30,6 +30,12 @@ const AuraAuth = {
 
   // Initialize official Google Identity Services SDK
   initGoogleAuth() {
+    // Bind demo/bypass sign-in button
+    const demoBtn = document.getElementById('demo-signin-btn');
+    if (demoBtn) {
+      demoBtn.addEventListener('click', () => this.triggerSimulatedLogin());
+    }
+
     if (typeof google !== 'undefined') {
       google.accounts.id.initialize({
         client_id: this.clientId,
