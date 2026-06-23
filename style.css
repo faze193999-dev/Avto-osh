@@ -9,6 +9,10 @@
   --accent-gold-rgb: 197, 168, 128;
   --accent-gold-hover: #e0c8a8;
   --accent-gold-glow: rgba(197, 168, 128, 0.35);
+  --accent-blue: #0070f3;
+  --accent-blue-rgb: 0, 112, 243;
+  --accent-blue-hover: #3291ff;
+  --accent-blue-glow: rgba(0, 112, 243, 0.35);
   --accent-silver: #e2e8f0;
   --text-primary: #ffffff;
   --text-secondary: #94a3b8;
@@ -32,6 +36,10 @@ body.light-theme {
   --accent-gold-rgb: 154, 120, 70;
   --accent-gold-hover: #7c5f35;
   --accent-gold-glow: rgba(154, 120, 70, 0.2);
+  --accent-blue: #0056b3;
+  --accent-blue-rgb: 0, 86, 179;
+  --accent-blue-hover: #004085;
+  --accent-blue-glow: rgba(0, 86, 179, 0.2);
   --accent-silver: #475569;
   --text-primary: #0f172a;
   --text-secondary: #475569;
@@ -2210,9 +2218,372 @@ body.light-theme footer.main-footer {
   }
   .compare-grid {
     grid-template-columns: 1fr;
+    .compare-drawer-bottom {
+      max-height: 80vh;
+      overflow-y: auto;
+    }
   }
-  .compare-drawer-bottom {
-    max-height: 80vh;
-    overflow-y: auto;
+}
+
+/* --- GOOGLE AUTHENTICATION & DASHBOARD STYLES --- */
+
+/* Login View Layout */
+.login-section {
+  display: none; /* Controlled by routing */
+  min-height: 100vh;
+  width: 100vw;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+  z-index: 10;
+  padding: 2rem;
+  background-size: cover;
+  background-position: center;
+  background-image: linear-gradient(180deg, rgba(7,7,8,0.85) 0%, rgba(7,7,8,0.95) 100%), url('https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1920&q=80');
+}
+
+body.light-theme .login-section {
+  background-image: linear-gradient(180deg, rgba(248,250,252,0.9) 0%, rgba(241,245,249,0.96) 100%), url('https://images.unsplash.com/photo-1614162692292-7ac56d7f7f1e?auto=format&fit=crop&w=1920&q=80');
+}
+
+.login-card {
+  max-width: 480px;
+  width: 100%;
+  border-radius: 16px;
+  padding: 3.5rem 3rem;
+  text-align: center;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.6);
+  border: 1px solid var(--border-color);
+  animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.login-brand {
+  font-family: var(--font-family-heading);
+  font-size: 1.8rem;
+  letter-spacing: 0.5rem;
+  color: var(--text-primary);
+  margin-bottom: 0.8rem;
+}
+
+.login-brand span {
+  color: var(--accent-blue);
+}
+
+.login-tagline {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  letter-spacing: 0.05rem;
+  margin-bottom: 3rem;
+}
+
+.oauth-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  margin-bottom: 2.5rem;
+}
+
+/* Fallback/Mock Login Button (For local offline testing) */
+.btn-google-fallback {
+  background: #ffffff;
+  color: #1f2937;
+  border: 1px solid #d1d5db;
+  padding: 0.85rem 1.8rem;
+  font-family: var(--font-family-sans);
+  font-size: 0.95rem;
+  font-weight: 600;
+  border-radius: 4px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  width: 100%;
+  max-width: 320px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.08);
+  transition: all 0.2s ease;
+}
+
+.btn-google-fallback:hover {
+  background: #f9fafb;
+  border-color: #c1c5cb;
+  transform: translateY(-1px);
+  box-shadow: 0 4px 8px rgba(0,0,0,0.12);
+}
+
+.btn-google-fallback svg {
+  flex-shrink: 0;
+}
+
+.login-footer-info {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  line-height: 1.6;
+}
+
+/* Auth Dynamic Loading Overlay */
+.auth-loading-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  z-index: 1000;
+  background: rgba(7, 7, 8, 0.9);
+  backdrop-filter: blur(10px);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  opacity: 0;
+  visibility: hidden;
+  transition: opacity 0.5s ease, visibility 0.5s ease;
+}
+
+.auth-loading-overlay.active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.auth-spinner {
+  width: 60px;
+  height: 60px;
+  border: 3px solid rgba(255, 255, 255, 0.05);
+  border-top: 3px solid var(--accent-blue);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+  margin-bottom: 1.5rem;
+  box-shadow: 0 0 20px var(--accent-blue-glow);
+}
+
+.auth-loading-text {
+  font-family: var(--font-family-sans);
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.2rem;
+  color: var(--accent-blue);
+  animation: pulse-glow 2s infinite ease-in-out;
+}
+
+/* User Profile Nav Dropdown */
+.user-profile-wrapper {
+  position: relative;
+}
+
+.user-profile-dropdown {
+  position: absolute;
+  top: calc(100% + 15px);
+  right: 0;
+  width: 300px;
+  border-radius: 12px;
+  padding: 1.8rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+  z-index: 150;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity 0.4s ease, transform 0.4s ease, visibility 0.4s ease;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+  border: 1px solid var(--border-color);
+}
+
+.user-profile-dropdown.active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.dropdown-user-info {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1.2rem;
+}
+
+.dropdown-avatar {
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 1px solid var(--accent-blue);
+}
+
+.dropdown-details h4 {
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  line-height: 1.2;
+}
+
+.dropdown-details p {
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  word-break: break-all;
+  margin-top: 0.2rem;
+}
+
+.dropdown-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.dropdown-actions a,
+.dropdown-actions button {
+  text-decoration: none;
+  font-size: 0.85rem;
+  font-weight: 500;
+  padding: 0.7rem 1rem;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  transition: var(--transition-fast);
+  cursor: pointer;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  text-align: left;
+}
+
+.dropdown-actions a:hover,
+.dropdown-actions button:hover {
+  background: rgba(255, 255, 255, 0.05);
+  color: var(--accent-blue);
+}
+
+body.light-theme .dropdown-actions a:hover,
+body.light-theme .dropdown-actions button:hover {
+  background: rgba(0, 0, 0, 0.04);
+}
+
+.btn-logout {
+  border-top: 1px solid var(--border-color) !important;
+  margin-top: 0.5rem;
+  color: #ef4444 !important;
+}
+
+.btn-logout:hover {
+  background: rgba(239, 68, 68, 0.08) !important;
+  color: #ef4444 !important;
+}
+
+/* Dashboard Section View */
+.dashboard-section {
+  display: none; /* Controlled by routing */
+  padding: 8rem 2rem;
+  max-width: 1400px;
+  margin: 0 auto;
+  min-height: 80vh;
+}
+
+.dashboard-wrapper {
+  display: flex;
+  flex-direction: column;
+  gap: 3rem;
+}
+
+.dash-welcome-card {
+  padding: 2.5rem;
+  border-radius: 12px;
+  box-shadow: 0 8px 30px var(--shadow-color);
+  border-left: 4px solid var(--accent-blue);
+}
+
+.dashboard-grid {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 3rem;
+}
+
+.dash-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid var(--border-color);
+  padding-bottom: 1rem;
+  margin-bottom: 2rem;
+}
+
+.dash-card-header h3 {
+  font-family: var(--font-family-heading);
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  letter-spacing: 0.1rem;
+}
+
+/* Auth Slide-in Toast Notifications */
+#auth-notifications-container {
+  position: fixed;
+  bottom: 2rem;
+  right: 2rem;
+  z-index: 500;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 380px;
+  width: 100%;
+}
+
+.auth-note {
+  display: flex;
+  gap: 1rem;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  border-radius: 8px;
+  border-left: 4px solid #10b981;
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+  transform: translateX(120%);
+  transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.auth-note.active {
+  transform: translateX(0);
+}
+
+.note-icon {
+  font-size: 1.2rem;
+  flex-shrink: 0;
+}
+
+.note-text {
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.note-success {
+  border-left-color: #10b981;
+  color: #10b981;
+}
+
+.note-error {
+  border-left-color: #ef4444;
+  color: #ef4444;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 1024px) {
+  .dashboard-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 768px) {
+  .login-card {
+    padding: 2.5rem 1.8rem;
+  }
+  .user-profile-dropdown {
+    width: 280px;
+    right: -60px; /* Shift to fit mobile viewport */
   }
 }
