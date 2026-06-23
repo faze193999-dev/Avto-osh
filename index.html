@@ -32,7 +32,6 @@
         <li><a href="#services">Services</a></li>
         <li><a href="#testimonials">Reviews</a></li>
         <li><a href="#contact">Contact</a></li>
-        <li><a href="#dashboard" id="nav-dashboard-link" style="display:none;">My Dashboard</a></li>
       </ul>
 
       <div class="nav-controls">
@@ -54,34 +53,7 @@
           <i data-lucide="moon" id="theme-icon-moon"></i>
         </button>
 
-        <!-- User Profile Toggle (shows user avatar when logged in) -->
-        <div class="user-profile-wrapper">
-          <button class="nav-btn" id="user-profile-toggle" aria-label="User Profile">
-            <i data-lucide="user"></i>
-          </button>
 
-          <!-- Profile Dropdown Panel -->
-          <div class="user-profile-dropdown glass" id="user-profile-dropdown">
-            <div class="dropdown-user-info">
-              <img class="dropdown-avatar" id="dropdown-user-avatar" src="" alt="User Avatar">
-              <div class="dropdown-details">
-                <h4 id="dropdown-user-name">Loading...</h4>
-                <p id="dropdown-user-email">...</p>
-              </div>
-            </div>
-            <div class="dropdown-actions">
-              <a href="#dashboard">
-                <i data-lucide="layout-dashboard"></i> My Dashboard
-              </a>
-              <a href="#inventory">
-                <i data-lucide="car"></i> Explore Fleet
-              </a>
-              <button class="btn-logout" id="btn-logout-dropdown">
-                <i data-lucide="log-out"></i> Sign Out
-              </button>
-            </div>
-          </div>
-        </div>
 
         <!-- Mobile Menu Toggle -->
         <button class="menu-toggle" id="menu-toggle" aria-label="Toggle Navigation Menu">
@@ -663,133 +635,14 @@
     </div>
   </footer>
 
-  <!-- ===== LOGIN PAGE SECTION ===== -->
-  <section class="login-section" id="login-section">
-    <div class="login-card glass">
 
-      <!-- Brand mark -->
-      <div style="margin-bottom: 2rem;">
-        <div class="login-brand">AURA<span>MOTORS</span></div>
-        <p class="login-tagline">The pinnacle of luxury automotive experience</p>
-      </div>
-
-      <!-- Hero Car Image Accent -->
-      <div style="width: 100%; height: 160px; border-radius: 8px; overflow: hidden; margin-bottom: 2.5rem; position: relative;">
-        <img src="https://images.unsplash.com/photo-1544636331-e26879cd4d9b?auto=format&fit=crop&w=600&q=80"
-          alt="Luxury Car"
-          style="width:100%; height:100%; object-fit: cover; filter: brightness(0.7);">
-        <div style="position: absolute; inset: 0; background: linear-gradient(to top, rgba(7,7,8,0.9) 0%, transparent 60%); display: flex; align-items: flex-end; padding: 1rem 1.2rem;">
-          <span style="font-family: var(--font-family-heading); font-size: 0.75rem; letter-spacing: 0.3rem; color: var(--accent-gold); text-transform: uppercase;">VIP Members Only</span>
-        </div>
-      </div>
-
-      <!-- Google Sign-In Container -->
-      <div class="oauth-container" style="display: flex; flex-direction: column; align-items: center; gap: 1rem;">
-        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 0.5rem; text-align: center;">Sign in to access your exclusive dashboard</p>
-        <!-- Google GSI Button renders here. Fallback button injected by auth.js if offline -->
-        <div id="google-signin-btn"></div>
-        <button class="btn btn-secondary" id="demo-signin-btn" style="width: 320px; font-size: 0.8rem; letter-spacing: 0.15rem; justify-content: center;">
-          Demo Mode (Bypass Auth)
-        </button>
-      </div>
-
-      <!-- Divider -->
-      <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
-        <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
-        <span style="font-size: 0.75rem; color: var(--text-secondary); white-space: nowrap;">SECURE AUTHENTICATION</span>
-        <div style="flex: 1; height: 1px; background: var(--border-color);"></div>
-      </div>
-
-      <!-- Footer Info -->
-      <p class="login-footer-info">
-        By signing in, you agree to our <a href="#" style="color: var(--accent-blue); text-decoration: none;">Terms of Service</a>
-        and <a href="#" style="color: var(--accent-blue); text-decoration: none;">Privacy Policy</a>.<br>
-        Your data is protected with enterprise-grade security.
-      </p>
-    </div>
-  </section>
-
-  <!-- ===== PROTECTED DASHBOARD SECTION ===== -->
-  <section class="dashboard-section" id="dashboard-section">
-    <div class="dashboard-wrapper">
-
-      <!-- Welcome Banner -->
-      <div class="dash-welcome-card glass" id="dash-welcome-banner">
-        <!-- Populated by auth.js after login -->
-        <div style="display: flex; align-items: center; gap: 1rem; color: var(--text-secondary);">
-          <i data-lucide="loader" style="animation: spin 1s linear infinite;"></i>
-          Loading your profile...
-        </div>
-      </div>
-
-      <!-- Dashboard Content Grid -->
-      <div class="dashboard-grid">
-
-        <!-- Left Column: Saved Wishlist Vehicles -->
-        <div>
-          <div class="dash-card-header">
-            <h3>Saved Vehicles</h3>
-            <a href="#inventory" style="font-size: 0.8rem; color: var(--accent-blue); text-decoration: none;">Browse Fleet &rarr;</a>
-          </div>
-          <div class="car-grid" id="dash-wishlist-cards" style="grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));">
-            <!-- Populated by auth.js -->
-          </div>
-        </div>
-
-        <!-- Right Column: Account Info -->
-        <div>
-          <div class="dash-card-header">
-            <h3>Account Overview</h3>
-          </div>
-          <div class="glass" style="border-radius: 12px; padding: 2rem; display: flex; flex-direction: column; gap: 1.5rem;">
-
-            <div style="display: flex; justify-content: space-between; padding: 0.8rem 0; border-bottom: 1px solid var(--border-color);">
-              <span style="font-size: 0.85rem; color: var(--text-secondary);">Membership Status</span>
-              <span style="font-size: 0.85rem; font-weight: 600; color: var(--accent-blue);">VIP Collector</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 0.8rem 0; border-bottom: 1px solid var(--border-color);">
-              <span style="font-size: 0.85rem; color: var(--text-secondary);">Saved Vehicles</span>
-              <span style="font-size: 0.85rem; font-weight: 600;" id="dash-wishlist-count">0</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 0.8rem 0; border-bottom: 1px solid var(--border-color);">
-              <span style="font-size: 0.85rem; color: var(--text-secondary);">Compare List</span>
-              <span style="font-size: 0.85rem; font-weight: 600;" id="dash-compare-count">0</span>
-            </div>
-            <div style="display: flex; justify-content: space-between; padding: 0.8rem 0;">
-              <span style="font-size: 0.85rem; color: var(--text-secondary);">Concierge Tier</span>
-              <span style="font-size: 0.85rem; font-weight: 600; color: var(--accent-gold);">Platinum</span>
-            </div>
-
-            <button class="btn btn-primary" onclick="window.location.href='#contact'" style="width: 100%; justify-content: center; margin-top: 0.5rem;">
-              <i data-lucide="calendar"></i> Book Appointment
-            </button>
-            <button class="btn btn-secondary" id="btn-logout-dashboard" style="width: 100%; justify-content: center;">
-              <i data-lucide="log-out"></i> Sign Out
-            </button>
-          </div>
-        </div>
-
-      </div>
-    </div>
-  </section>
-
-  <!-- Auth Loading Overlay -->
-  <div class="auth-loading-overlay" id="auth-loading-overlay">
-    <div class="auth-spinner"></div>
-    <div class="auth-loading-text">Authenticating&nbsp;&nbsp;Please Wait</div>
-    <div style="margin-top: 1.5rem; font-family: var(--font-family-heading); font-size: 1rem; letter-spacing: 0.5rem; color: var(--text-primary); opacity: 0.5;">AURA<span style="color: var(--accent-blue);">MOTORS</span></div>
-  </div>
 
   <!-- GSAP CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
-  <!-- Google Identity Services (OAuth 2.0) -->
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <!-- Data Import -->
   <script src="cars.js"></script>
-  <!-- Auth Module -->
-  <script src="auth.js"></script>
   <!-- Main Script -->
   <script src="app.js"></script>
 </body>
