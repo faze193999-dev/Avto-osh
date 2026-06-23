@@ -5,6 +5,7 @@ document.addEventListener('DOMContentLoaded', () => {
   
   // Shadow global carsData with the persistent localStorage database
   const carsData = JSON.parse(localStorage.getItem('aura_cars')) || initialCarsData;
+  console.log("AURA MOTORS - Loaded " + carsData.length + " vehicles. Data source: " + (localStorage.getItem('aura_cars') ? "localStorage" : "static cars.js"));
 
   // Initialize Lucide Icons
   if (window.lucide) {
