@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AURA MOTORS | Admin Control Panel</title>
+  <!-- Google Fonts: Space Grotesk (headers) & Inter (body) -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <!-- Stylesheet -->
+  <link rel="stylesheet" href="admin.css">
+</head>
+<body class="dark-theme">
+
+  <!-- Main Portal Portal Layout -->
+  <div class="portal-wrapper">
+    
+    <!-- LEFT SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="sidebar-brand">
+        <a href="index.html" class="logo-link">AURA<span>MOTORS</span></a>
+        <span class="badge badge-portal">PORTAL</span>
+      </div>
+
+      <nav class="sidebar-menu">
+        <button class="menu-item active" data-tab="dashboard">
+          <i data-lucide="layout-dashboard"></i>
+          <span>Dashboard</span>
+        </button>
+        <button class="menu-item" data-tab="cars">
+          <i data-lucide="car"></i>
+          <span>Cars Management</span>
+        </button>
+        <button class="menu-item" data-tab="add-car">
+          <i data-lucide="plus-square"></i>
+          <span>Add New Car</span>
+        </button>
+        <button class="menu-item" data-tab="leads">
+          <i data-lucide="message-square"></i>
+          <span>Leads & Inquiries</span>
+          <span class="badge badge-alert" id="leads-badge" style="display: none;">0</span>
+        </button>
+        <button class="menu-item" data-tab="customers">
+          <i data-lucide="users"></i>
+          <span>Customers</span>
+        </button>
+        <button class="menu-item" data-tab="analytics">
+          <i data-lucide="line-chart"></i>
+          <span>Analytics</span>
+        </button>
+        <button class="menu-item" data-tab="settings">
+          <i data-lucide="settings"></i>
+          <span>Settings</span>
+        </button>
+        <button class="menu-item" data-tab="profile">
+          <i data-lucide="user-cog"></i>
+          <span>Profile</span>
+        </button>
+      </nav>
+
+      <div class="sidebar-footer">
+        <button class="btn-logout" id="sidebar-logout-btn">
+          <i data-lucide="log-out"></i>
+          <span>Logout</span>
+        </button>
+      </div>
+    </aside>
+
+    <!-- RIGHT CONTENT AREA -->
+    <div class="content-wrapper">
+      
+      <!-- TOP NAVBAR -->
+      <header class="navbar">
+        <!-- Sidebar Toggle (Mobile) -->
+        <button class="mobile-menu-btn" id="mobile-toggle" aria-label="Toggle Menu">
+          <i data-lucide="menu"></i>
+        </button>
+
+        <!-- Search Bar -->
+        <div class="search-bar-wrapper">
+          <i data-lucide="search" class="search-icon"></i>
+          <input type="text" id="global-search" placeholder="Search vehicles, leads, or collectors...">
+        </div>
+
+        <!-- Controls -->
+        <div class="nav-controls">
+          <!-- Light/Dark Mode Toggle -->
+          <button class="nav-btn" id="theme-toggle" aria-label="Toggle Theme">
+            <i data-lucide="sun" id="theme-icon-sun" style="display: none;"></i>
+            <i data-lucide="moon" id="theme-icon-moon"></i>
+          </button>
+
+          <!-- Notifications Center -->
+          <div class="dropdown-wrapper notifications-wrapper">
+            <button class="nav-btn" id="notifications-toggle" aria-label="Notifications">
+              <i data-lucide="bell"></i>
+              <span class="badge badge-dot" id="notif-dot" style="display: none;"></span>
+            </button>
+            <div class="dropdown-panel glass" id="notifications-dropdown">
+              <div class="dropdown-header">
+                <h4>Notifications</h4>
+                <button class="btn-clear-notif" id="clear-notifications-btn">Clear All</button>
+              </div>
+              <div class="dropdown-list" id="notifications-list">
+                <!-- Populated dynamically -->
+              </div>
+            </div>
+          </div>
+
+          <!-- Admin Profile Dropdown -->
+          <div class="dropdown-wrapper profile-wrapper">
+            <button class="profile-toggle" id="profile-toggle" aria-label="Admin Profile">
+              <img id="nav-admin-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80" alt="Admin Avatar">
+              <span class="admin-name" id="nav-admin-name">Admin</span>
+              <i data-lucide="chevron-down"></i>
+            </button>
+            <div class="dropdown-panel glass" id="profile-dropdown">
+              <div class="profile-info">
+                <img id="dropdown-admin-avatar" src="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80" alt="Admin Avatar">
+                <div>
+                  <h4 id="dropdown-admin-name">Admin Name</h4>
+                  <p id="dropdown-admin-role">Super Admin</p>
+                </div>
+              </div>
+              <div class="profile-links">
+                <button data-tab="profile" class="dropdown-link-btn"><i data-lucide="user"></i> Account Settings</button>
+                <button data-tab="settings" class="dropdown-link-btn"><i data-lucide="sliders"></i> System Config</button>
+                <div class="divider"></div>
+                <button class="dropdown-link-btn logout-text" id="navbar-logout-btn"><i data-lucide="log-out"></i> Sign Out</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </header>
+
+      <!-- MAIN TABS CONTAINER -->
+      <main class="main-content" id="main-content">
+
+        <!-- TAB 1: DASHBOARD -->
+        <section class="tab-panel active" id="tab-dashboard">
+          
+          <div class="dashboard-header-block">
+            <div>
+              <h1 class="page-title">Executive Overview</h1>
+              <p class="page-subtitle">Aura Motors live dealership stats and business intelligence.</p>
+            </div>
+            <div class="date-picker-badge">
+              <i data-lucide="calendar"></i>
+              <span id="live-date-str">June 2026</span>
+            </div>
+          </div>
+
+          <!-- STATISTICS CARDS -->
+          <div class="stats-grid">
+            <div class="stat-card glass">
+              <div class="stat-icon-wrapper blue">
+                <i data-lucide="car"></i>
+              </div>
+              <div class="stat-details">
+                <span class="stat-label">Total Fleet</span>
+                <h3 class="stat-value" id="stat-total-cars">0</h3>
+                <span class="stat-meta text-success"><i data-lucide="trending-up"></i> +2 added this week</span>
+              </div>
+            </div>
+            <div class="stat-card glass">
+              <div class="stat-icon-wrapper green">
+                <i data-lucide="check-circle-2"></i>
+              </div>
+              <div class="stat-details">
+                <span class="stat-label">Active Listings</span>
+                <h3 class="stat-value" id="stat-active-listings">0</h3>
+                <span class="stat-meta text-muted">Available in catalog</span>
+              </div>
+            </div>
+            <div class="stat-card glass">
+              <div class="stat-icon-wrapper orange">
+                <i data-lucide="message-square"></i>
+              </div>
+              <div class="stat-details">
+                <span class="stat-label">New Leads</span>
+                <h3 class="stat-value" id="stat-new-leads">0</h3>
+                <span class="stat-meta text-orange" id="stat-pending-leads-pct"><i data-lucide="clock"></i> Action required</span>
+              </div>
+            </div>
+            <div class="stat-card glass">
+              <div class="stat-icon-wrapper purple">
+                <i data-lucide="shopping-cart"></i>
+              </div>
+              <div class="stat-details">
+                <span class="stat-label">Sold Vehicles</span>
+                <h3 class="stat-value" id="stat-sold-cars">0</h3>
+                <span class="stat-meta text-success"><i data-lucide="trending-up"></i> +12% vs last month</span>
+              </div>
+            </div>
+            <div class="stat-card glass">
+              <div class="stat-icon-wrapper gold">
+                <i data-lucide="dollar-sign"></i>
+              </div>
+              <div class="stat-details">
+                <span class="stat-label">Monthly Revenue</span>
+                <h3 class="stat-value" id="stat-monthly-revenue">$0</h3>
+                <span class="stat-meta text-success"><i data-lucide="trending-up"></i> VIP allocations active</span>
+              </div>
+            </div>
+            <div class="stat-card glass">
+              <div class="stat-icon-wrapper cyan">
+                <i data-lucide="eye"></i>
+              </div>
+              <div class="stat-details">
+                <span class="stat-label">Site Visitors</span>
+                <h3 class="stat-value" id="stat-site-visitors">0</h3>
+                <span class="stat-meta text-success"><i data-lucide="trending-up"></i> +28.4% traffic spike</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ANALYTICS SECTION (CHARTS) -->
+          <div class="charts-grid">
+            <div class="chart-card glass">
+              <div class="chart-header">
+                <h3>Revenue Growth ($)</h3>
+                <div class="chart-legend">
+                  <span class="legend-dot blue"></span> <span>Revenue</span>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="revenue-chart"></canvas>
+              </div>
+            </div>
+            <div class="chart-card glass">
+              <div class="chart-header">
+                <h3>Customer Inquiries & Sales</h3>
+                <div class="chart-legend">
+                  <span class="legend-dot green"></span> <span>Sales</span>
+                  <span class="legend-dot orange" style="margin-left: 1rem;"></span> <span>Leads</span>
+                </div>
+              </div>
+              <div class="chart-container">
+                <canvas id="leads-chart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- BOTTOM TABLES GRID -->
+          <div class="dashboard-tables-grid">
+            
+            <!-- RECENT LEADS -->
+            <div class="table-card glass">
+              <div class="table-header">
+                <h3>Recent Client Inquiries</h3>
+                <button class="btn btn-secondary-sm" data-tab="leads">Manage Leads</button>
+              </div>
+              <div class="table-container">
+                <table class="dashboard-table">
+                  <thead>
+                    <tr>
+                      <th>Customer Name</th>
+                      <th>Interested Vehicle</th>
+                      <th>Status</th>
+                      <th>Date</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recent-leads-tbody">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            <!-- RECENT CARS -->
+            <div class="table-card glass">
+              <div class="table-header">
+                <h3>Recently Added Vehicles</h3>
+                <button class="btn btn-secondary-sm" data-tab="cars">View Catalog</button>
+              </div>
+              <div class="table-container">
+                <table class="dashboard-table">
+                  <thead>
+                    <tr>
+                      <th>Vehicle</th>
+                      <th>Price</th>
+                      <th>Status</th>
+                      <th>Featured</th>
+                    </tr>
+                  </thead>
+                  <tbody id="recent-cars-tbody">
+                    <!-- Populated dynamically -->
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+          </div>
+
+        </section>
+
+        <!-- TAB 2: CARS MANAGEMENT -->
+        <section class="tab-panel" id="tab-cars">
+          <div class="section-header-block">
+            <div>
+              <h1 class="page-title">Catalog Inventory</h1>
+              <p class="page-subtitle">Add, modify, feature, or remove luxury hypercars from AURA MOTORS.</p>
+            </div>
+            <button class="btn btn-primary" data-tab="add-car">
+              <i data-lucide="plus"></i> Add New Vehicle
+            </button>
+          </div>
+
+          <!-- FILTER BAR -->
+          <div class="filter-bar glass">
+            <div class="filter-group">
+              <label for="car-filter-search">Search</label>
+              <input type="text" id="car-filter-search" placeholder="Search by name or model...">
+            </div>
+            <div class="filter-group">
+              <label for="car-filter-brand">Brand</label>
+              <select id="car-filter-brand">
+                <option value="all">All Brands</option>
+                <!-- Filled dynamically -->
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="car-filter-fuel">Fuel Type</label>
+              <select id="car-filter-fuel">
+                <option value="all">All Fuel Types</option>
+                <option value="Gasoline">Gasoline</option>
+                <option value="Electric">Electric</option>
+                <option value="Hybrid">Hybrid</option>
+              </select>
+            </div>
+            <div class="filter-group">
+              <label for="car-filter-featured">Status</label>
+              <select id="car-filter-featured">
+                <option value="all">All Statuses</option>
+                <option value="featured">Featured Only</option>
+                <option value="standard">Standard Only</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- CARS LIST TABLE -->
+          <div class="table-card glass" style="margin-top: 2rem;">
+            <div class="table-container">
+              <table class="dashboard-table catalog-table">
+                <thead>
+                  <tr>
+                    <th>Vehicle</th>
+                    <th>Year</th>
+                    <th>Price</th>
+                    <th>Specs</th>
+                    <th>Fuel / Trans</th>
+                    <th>Featured</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="catalog-cars-tbody">
+                  <!-- Populated dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 3: ADD/EDIT NEW CAR -->
+        <section class="tab-panel" id="tab-add-car">
+          <div class="section-header-block">
+            <div>
+              <h1 class="page-title" id="form-page-title">Add New Vehicle</h1>
+              <p class="page-subtitle">Publish a new high-performance luxury automobile to the dealership database.</p>
+            </div>
+            <button class="btn btn-secondary" data-tab="cars">
+              Cancel & Return
+            </button>
+          </div>
+
+          <form class="glass form-wrapper" id="vehicle-form">
+            <!-- Hidden input for editing ID -->
+            <input type="hidden" id="form-car-id" value="">
+
+            <div class="form-grid">
+              
+              <!-- Left Column: Specs -->
+              <div class="form-column">
+                <h3 class="form-section-title">Core Specifications</h3>
+                
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label for="car-brand">Brand Name *</label>
+                    <input type="text" id="car-brand" required placeholder="e.g. Lamborghini">
+                  </div>
+                  <div class="form-group">
+                    <label for="car-name">Model Name *</label>
+                    <input type="text" id="car-name" required placeholder="e.g. Aventador LP780-4">
+                  </div>
+                </div>
+
+                <div class="form-row-3">
+                  <div class="form-group">
+                    <label for="car-year">Model Year *</label>
+                    <input type="number" id="car-year" min="1900" max="2030" required placeholder="e.g. 2024">
+                  </div>
+                  <div class="form-group">
+                    <label for="car-price">Price ($) *</label>
+                    <input type="number" id="car-price" min="0" required placeholder="e.g. 350000">
+                  </div>
+                  <div class="form-group">
+                    <label for="car-hp">Horsepower (HP) *</label>
+                    <input type="number" id="car-hp" min="0" required placeholder="e.g. 780">
+                  </div>
+                </div>
+
+                <div class="form-row-3">
+                  <div class="form-group">
+                    <label for="car-fuel">Fuel Type *</label>
+                    <select id="car-fuel" required>
+                      <option value="Gasoline">Gasoline</option>
+                      <option value="Electric">Electric</option>
+                      <option value="Hybrid">Hybrid</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="car-transmission">Transmission *</label>
+                    <select id="car-transmission" required>
+                      <option value="Automatic">Automatic</option>
+                      <option value="Manual">Manual</option>
+                    </select>
+                  </div>
+                  <div class="form-group">
+                    <label for="car-drivetrain">Drivetrain *</label>
+                    <input type="text" id="car-drivetrain" required placeholder="e.g. AWD or RWD">
+                  </div>
+                </div>
+
+                <div class="form-row-3">
+                  <div class="form-group">
+                    <label for="car-engine">Engine Type *</label>
+                    <input type="text" id="car-engine" required placeholder="e.g. 6.5L V12">
+                  </div>
+                  <div class="form-group">
+                    <label for="car-acceleration">Acceleration (0-60mph) *</label>
+                    <input type="text" id="car-acceleration" required placeholder="e.g. 2.8s">
+                  </div>
+                  <div class="form-group">
+                    <label for="car-topspeed">Top Speed *</label>
+                    <input type="text" id="car-topspeed" required placeholder="e.g. 220 mph">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="car-description">Vehicle Narrative / Description *</label>
+                  <textarea id="car-description" rows="5" required placeholder="Enter description detailing the craftsmanship, condition, speed specs and performance highlights..."></textarea>
+                </div>
+              </div>
+
+              <!-- Right Column: Media -->
+              <div class="form-column">
+                <h3 class="form-section-title">Media & Showroom Display</h3>
+                
+                <div class="form-group">
+                  <label for="car-image">Main Display Image URL *</label>
+                  <input type="url" id="car-image" required placeholder="https://images.unsplash.com/...">
+                </div>
+
+                <div class="form-group">
+                  <label for="car-gallery">Gallery Image URLs (One URL per line) *</label>
+                  <textarea id="car-gallery" rows="5" required placeholder="https://images.unsplash.com/photo-1
+https://images.unsplash.com/photo-2
+https://images.unsplash.com/photo-3"></textarea>
+                  <p class="field-tip">Provide at least 3 URLs for the showcase slider.</p>
+                </div>
+
+                <div class="form-group">
+                  <label for="car-angles">360° Viewer Image Angles (One URL per line - Exactly 6 URLs)</label>
+                  <textarea id="car-angles" rows="5" placeholder="Angle 1 (Front)...
+Angle 2...
+Angle 3...
+Angle 4...
+Angle 5...
+Angle 6 (Back)..."></textarea>
+                  <p class="field-tip">Optional. If empty, the website will use gallery assets for the 360° carousel.</p>
+                </div>
+
+                <div class="form-group flex-row-align">
+                  <div class="checkbox-wrapper">
+                    <input type="checkbox" id="car-featured">
+                    <label for="car-featured">Feature on Showroom Homepage</label>
+                  </div>
+                </div>
+
+                <div class="form-actions" style="margin-top: 3rem;">
+                  <button type="submit" class="btn btn-primary" id="form-submit-btn">Save Vehicle Details</button>
+                  <button type="button" class="btn btn-secondary" id="form-clear-btn">Clear All</button>
+                </div>
+              </div>
+
+            </div>
+          </form>
+        </section>
+
+        <!-- TAB 4: LEADS & INQUIRIES -->
+        <section class="tab-panel" id="tab-leads">
+          <div class="section-header-block">
+            <div>
+              <h1 class="page-title">Client Inquiries</h1>
+              <p class="page-subtitle">Track, update, and manage customer acquisition leads for premium cars.</p>
+            </div>
+          </div>
+
+          <!-- Leads Filter -->
+          <div class="filter-bar glass">
+            <div class="filter-group">
+              <label for="leads-filter-search">Search Clients</label>
+              <input type="text" id="leads-filter-search" placeholder="Search by name, phone or vehicle...">
+            </div>
+            <div class="filter-group">
+              <label for="leads-filter-status">Inquiry Status</label>
+              <select id="leads-filter-status">
+                <option value="all">All Inquiries</option>
+                <option value="New">New</option>
+                <option value="Contacted">Contacted</option>
+                <option value="Sold">Sold</option>
+                <option value="Closed">Closed</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Leads Table -->
+          <div class="table-card glass" style="margin-top: 2rem;">
+            <div class="table-container">
+              <table class="dashboard-table catalog-table">
+                <thead>
+                  <tr>
+                    <th>Customer Name</th>
+                    <th>Phone / Contact</th>
+                    <th>Vehicle of Interest</th>
+                    <th>Date</th>
+                    <th>Status</th>
+                    <th>Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="leads-tbody">
+                  <!-- Filled dynamically -->
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- TAB 5: CUSTOMER MANAGEMENT -->
+        <section class="tab-panel" id="tab-customers">
+          <div class="section-header-block">
+            <div>
+              <h1 class="page-title">VIP Collectors Directory</h1>
+              <p class="page-subtitle">Access profile records, wishlist items, and purchase archives of AURA clients.</p>
+            </div>
+          </div>
+
+          <!-- Customers Grid -->
+          <div class="customers-grid" id="customers-cards-grid">
+            <!-- Populated dynamically -->
+          </div>
+        </section>
+
+        <!-- TAB 6: ANALYTICS -->
+        <section class="tab-panel" id="tab-analytics">
+          <div class="section-header-block">
+            <div>
+              <h1 class="page-title">Performance Analytics</h1>
+              <p class="page-subtitle">Deep dive business intelligence charts tracking revenue, sales conversion, and site traffic.</p>
+            </div>
+          </div>
+
+          <div class="analytics-charts-detailed">
+            
+            <div class="chart-card-large glass">
+              <div class="chart-header">
+                <h3>Revenue Trend ($)</h3>
+                <p class="chart-subtitle">Calculated monthly revenue from VIP allocations and direct showroom deals.</p>
+              </div>
+              <div class="chart-container-large">
+                <canvas id="analytics-revenue-large-chart"></canvas>
+              </div>
+            </div>
+
+            <div class="analytics-row-charts">
+              
+              <div class="chart-card glass">
+                <div class="chart-header">
+                  <h3>Lead Acquisition Channel</h3>
+                </div>
+                <div class="chart-container">
+                  <canvas id="analytics-channels-chart"></canvas>
+                </div>
+              </div>
+
+              <div class="chart-card glass">
+                <div class="chart-header">
+                  <h3>Catalog Engagement by Category</h3>
+                </div>
+                <div class="chart-container">
+                  <canvas id="analytics-categories-chart"></canvas>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+        </section>
+
+        <!-- TAB 7: SETTINGS -->
+        <section class="tab-panel" id="tab-settings">
+          <div class="section-header-block">
+            <div>
+              <h1 class="page-title">System Settings</h1>
+              <p class="page-subtitle">Manage system rules, SEO descriptions, contact portals, and dealership policies.</p>
+            </div>
+          </div>
+
+          <div class="settings-grid">
+            
+            <!-- Left panel: Dealership Info & SEO -->
+            <div class="settings-column">
+              <div class="glass form-wrapper">
+                <h3 class="form-section-title">Dealership Information</h3>
+                
+                <div class="form-group">
+                  <label for="settings-dealer-name">Dealership Name</label>
+                  <input type="text" id="settings-dealer-name" value="AURA MOTORS">
+                </div>
+
+                <div class="form-row-2">
+                  <div class="form-group">
+                    <label for="settings-dealer-phone">Business Phone</label>
+                    <input type="text" id="settings-dealer-phone" value="+1 (555) 019-9000">
+                  </div>
+                  <div class="form-group">
+                    <label for="settings-dealer-email">Sales Email</label>
+                    <input type="email" id="settings-dealer-email" value="sales@auramotors.com">
+                  </div>
+                </div>
+
+                <div class="form-group">
+                  <label for="settings-dealer-address">Dealership Address</label>
+                  <input type="text" id="settings-dealer-address" value="700 S Las Vegas Blvd, Las Vegas, NV 89101">
+                </div>
+
+                <h3 class="form-section-title" style="margin-top: 2rem;">SEO & Web Performance</h3>
+
+                <div class="form-group">
+                  <label for="settings-seo-title">Meta Title Template</label>
+                  <input type="text" id="settings-seo-title" value="AURA MOTORS | Futuristic Luxury Car Dealership">
+                </div>
+
+                <div class="form-group">
+                  <label for="settings-seo-description">Meta Description</label>
+                  <textarea id="settings-seo-description" rows="3">Experience the pinnacle of automotive luxury and performance. Explore, compare, and drive your dream sports car today at Aura Motors.</textarea>
+                </div>
+
+                <button class="btn btn-primary" id="save-general-settings-btn" style="margin-top: 1rem;">Save Portal Configuration</button>
+              </div>
+            </div>
+
+            <!-- Right panel: Social Links & Team Members -->
+            <div class="settings-column">
+              <div class="glass form-wrapper">
+                <h3 class="form-section-title">Social Showroom Connections</h3>
+
+                <div class="form-group">
+                  <label for="settings-social-ig">Instagram URL</label>
+                  <input type="url" id="settings-social-ig" value="https://instagram.com/auramotors">
+                </div>
+                <div class="form-group">
+                  <label for="settings-social-yt">YouTube Channel</label>
+                  <input type="url" id="settings-social-yt" value="https://youtube.com/auramotors">
+                </div>
+                <div class="form-group">
+                  <label for="settings-social-tw">X / Twitter</label>
+                  <input type="url" id="settings-social-tw" value="https://x.com/auramotors">
+                </div>
+
+                <h3 class="form-section-title" style="margin-top: 2rem;">Authorized Admin Accounts</h3>
+                
+                <div class="team-admins-list" id="admins-list-container">
+                  <!-- Rendered dynamically -->
+                </div>
+
+                <button class="btn btn-secondary" id="add-admin-account-btn" style="width: 100%; justify-content: center; margin-top: 1.5rem;">
+                  <i data-lucide="plus"></i> Authorize New Team Member
+                </button>
+              </div>
+            </div>
+
+          </div>
+        </section>
+
+        <!-- TAB 8: PROFILE -->
+        <section class="tab-panel" id="tab-profile">
+          <div class="section-header-block">
+            <div>
+              <h1 class="page-title">Personal Settings</h1>
+              <p class="page-subtitle">View and update your personal admin details, role privileges, and credentials.</p>
+            </div>
+          </div>
+
+          <div class="profile-card-container glass">
+            <div class="profile-details-card">
+              <div class="profile-card-left">
+                <div class="avatar-upload-area">
+                  <img id="profile-card-avatar" src="" alt="Admin Avatar">
+                  <div class="avatar-overlay">
+                    <i data-lucide="camera"></i>
+                  </div>
+                </div>
+                <h2 id="profile-card-name">Admin Name</h2>
+                <span class="role-badge" id="profile-card-role">Super Admin</span>
+              </div>
+              <div class="profile-card-right">
+                <form id="admin-profile-form">
+                  <div class="form-row-2">
+                    <div class="form-group">
+                      <label for="profile-name">Full Name</label>
+                      <input type="text" id="profile-name" required value="Eleanor Vance">
+                    </div>
+                    <div class="form-group">
+                      <label for="profile-email">Email Address</label>
+                      <input type="email" id="profile-email" required value="eleanor@auramotors.com">
+                    </div>
+                  </div>
+                  <div class="form-row-2">
+                    <div class="form-group">
+                      <label for="profile-role">Designation / Role</label>
+                      <input type="text" id="profile-role" readonly value="Super Admin" class="readonly-input">
+                    </div>
+                    <div class="form-group">
+                      <label for="profile-avatar-url">Avatar Photo URL</label>
+                      <input type="url" id="profile-avatar-url" required value="https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&h=150&q=80">
+                    </div>
+                  </div>
+                  <div class="form-group">
+                    <label for="profile-password">Change Password</label>
+                    <input type="password" id="profile-password" placeholder="••••••••" value="admin1234">
+                  </div>
+                  <button type="submit" class="btn btn-primary" style="margin-top: 1rem;">Update Account Details</button>
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
+
+      </main>
+
+    </div>
+  </div>
+
+  <!-- VIEW CAR DETAILS MODAL -->
+  <div class="modal-overlay" id="car-details-modal">
+    <div class="modal-box glass modal-large">
+      <div class="modal-header">
+        <h3 id="modal-car-title">Lamborghini Aventador</h3>
+        <button class="modal-close" id="modal-car-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="modal-car-grid">
+          <div class="modal-car-left">
+            <img id="modal-car-image" src="" alt="Car Image">
+            <div class="modal-car-gallery" id="modal-car-gallery-row">
+              <!-- Populated dynamically -->
+            </div>
+          </div>
+          <div class="modal-car-right">
+            <span class="modal-car-brand" id="modal-car-brand">Lamborghini</span>
+            <div class="modal-car-price" id="modal-car-price">$507,000</div>
+            <p class="modal-car-description" id="modal-car-desc">Description text...</p>
+            
+            <div class="modal-car-specs-grid">
+              <div class="spec-tile">
+                <span class="spec-label">Year</span>
+                <span class="spec-val" id="modal-car-spec-year">2023</span>
+              </div>
+              <div class="spec-tile">
+                <span class="spec-label">Fuel</span>
+                <span class="spec-val" id="modal-car-spec-fuel">Gasoline</span>
+              </div>
+              <div class="spec-tile">
+                <span class="spec-label">Transmission</span>
+                <span class="spec-val" id="modal-car-spec-trans">Automatic</span>
+              </div>
+              <div class="spec-tile">
+                <span class="spec-label">Power</span>
+                <span class="spec-val" id="modal-car-spec-hp">780 HP</span>
+              </div>
+              <div class="spec-tile">
+                <span class="spec-label">0-60 mph</span>
+                <span class="spec-val" id="modal-car-spec-acc">2.8s</span>
+              </div>
+              <div class="spec-tile">
+                <span class="spec-label">Top Speed</span>
+                <span class="spec-val" id="modal-car-spec-speed">220 mph</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CONTACT LEAD MODAL -->
+  <div class="modal-overlay" id="lead-contact-modal">
+    <div class="modal-box glass">
+      <div class="modal-header">
+        <h3>Contact Client</h3>
+        <button class="modal-close" id="modal-lead-close-btn">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 1.5rem;">Drafting sales pitch for <span style="font-weight:600; color:var(--text-primary);" id="contact-client-name">John Doe</span> regarding the <span style="font-weight:600; color:var(--accent-blue);" id="contact-client-car">Ferrari SF90</span>.</p>
+        
+        <div class="form-group">
+          <label for="contact-channel">Communication Mode</label>
+          <select id="contact-channel">
+            <option value="email">Email Portal (sales@auramotors.com)</option>
+            <option value="phone">Direct VIP Line (+1 (555) 019-9000)</option>
+            <option value="whatsapp">Secure WhatsApp Client</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="contact-template">Message Template</label>
+          <select id="contact-template">
+            <option value="intro">Test Drive Scheduling & Booking Confirmation</option>
+            <option value="pricing">Bespoke Financing Options & Pricing Sheet</option>
+            <option value="avail">Exclusive Allocation / Delivery Status</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="contact-msg-content">Message Preview</label>
+          <textarea id="contact-msg-content" rows="6"></textarea>
+        </div>
+
+        <div style="display:flex; justify-content: flex-end; gap: 1rem; margin-top: 2rem;">
+          <button class="btn btn-secondary" id="btn-cancel-contact">Close</button>
+          <button class="btn btn-primary" id="btn-send-contact"><i data-lucide="send"></i> Dispatch Message</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- GLOBAL NOTIFICATION TOAST OVERLAY -->
+  <div id="toast-container" class="toast-container"></div>
+
+  <!-- CDNs -->
+  <!-- ChartJS CDN for premium analytical graphs -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Main Script -->
+  <script src="admin.js"></script>
+</body>
+</html>
