@@ -15,16 +15,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
   // Check and initialize Cars data
   let cars = JSON.parse(localStorage.getItem('aura_cars'));
-  if (!cars) {
-    // If carsData is imported from cars.js, use it, otherwise fall back to empty
-    cars = typeof carsData !== 'undefined' ? carsData : [];
-    // Inject a "status" field for catalog tracking
-    cars = cars.map(car => ({
+  const defaultCars = typeof carsData !== 'undefined' ? carsData : [];
+
+  if (!cars || cars.length === 0) {
+    cars = defaultCars.map(car => ({
       ...car,
       status: car.status || 'Available', // Available, Reserved, Sold
       featured: car.featured !== undefined ? car.featured : true
     }));
     localStorage.setItem('aura_cars', JSON.stringify(cars));
+  } else {
+    // Check if any default cars are missing in the localStorage list and add them
+    let modified = false;
+    defaultCars.forEach(defaultCar => {
+      const exists = cars.some(c => c.id === defaultCar.id);
+      if (!exists) {
+        cars.unshift({
+          ...defaultCar,
+          status: defaultCar.status || 'Available',
+          featured: defaultCar.featured !== undefined ? defaultCar.featured : true
+        });
+        modified = true;
+      }
+    });
+    if (modified) {
+      localStorage.setItem('aura_cars', JSON.stringify(cars));
+    }
   }
 
   // Check and initialize Leads data
