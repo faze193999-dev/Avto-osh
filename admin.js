@@ -4,6 +4,56 @@
 
 document.addEventListener('DOMContentLoaded', () => {
 
+  // --- Admin Portal Authentication Gate ---
+  const authOverlay = document.getElementById('admin-auth-overlay');
+  const authForm = document.getElementById('admin-auth-form');
+  const authEmailInput = document.getElementById('auth-email');
+  const authPasswordInput = document.getElementById('auth-password');
+
+  function checkAuth() {
+    const session = localStorage.getItem('aura_admin_session');
+    if (session === 'true') {
+      if (authOverlay) {
+        authOverlay.classList.remove('active');
+      }
+      document.body.classList.remove('auth-locked');
+    } else {
+      if (authOverlay) {
+        authOverlay.classList.add('active');
+      }
+      document.body.classList.add('auth-locked');
+    }
+  }
+
+  // Initial Check
+  checkAuth();
+
+  if (authForm) {
+    authForm.addEventListener('submit', (e) => {
+      e.preventDefault();
+      const email = authEmailInput.value.trim();
+      const password = authPasswordInput.value;
+
+      if (email === 'faze193999@gmail.com' && password === 'Asa99-99') {
+        localStorage.setItem('aura_admin_session', 'true');
+        showToast('Tizimga muvaffaqiyatli kirildi!', 'success');
+        if (authOverlay) {
+          authOverlay.classList.remove('active');
+        }
+        document.body.classList.remove('auth-locked');
+        authForm.reset();
+      } else {
+        showToast('Email yoki parol noto\'g\'ri!', 'error');
+        const card = authOverlay ? authOverlay.querySelector('.auth-card') : null;
+        if (card) {
+          card.style.animation = 'none';
+          card.offsetHeight; // trigger reflow
+          card.style.animation = 'shake 0.4s ease-in-out';
+        }
+      }
+    });
+  }
+
   // --- Initialize Lucide Icons ---
   if (window.lucide) {
     window.lucide.createIcons();
@@ -1526,8 +1576,9 @@ document.addEventListener('DOMContentLoaded', () => {
   const navbarLogout = document.getElementById('navbar-logout-btn');
 
   function handleLogout() {
-    if (confirm("Are you sure you want to log out of the Admin Portal?")) {
-      showToast('Logged out of admin console', 'info');
+    if (confirm("Admin paneldan chiqishni xohlaysizmi?")) {
+      localStorage.removeItem('aura_admin_session');
+      showToast('Tizimdan chiqildi', 'info');
       setTimeout(() => {
         window.location.href = 'index.html';
       }, 800);
